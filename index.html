@@ -90,6 +90,13 @@
   .guide dl{display:grid;grid-template-columns:200px 1fr;gap:10px 20px;font-size:18.5px}
   .guide dt{font-weight:700} .guide dd{color:var(--ink-soft);line-height:1.8}
   .tab-link{color:var(--accent);font-weight:700;cursor:pointer;border-bottom:1px solid var(--accent)}
+  .author{display:grid;grid-template-columns:180px 1fr;gap:28px;align-items:start;border:1px solid var(--rule);padding:24px 28px;background:#fbfcfa}
+  .author img{width:180px;height:180px;object-fit:cover;border:1px solid var(--rule)}
+  .author-name{font-size:26px;font-weight:700;margin-bottom:8px}
+  .author-name span{font-family:var(--mono);font-size:12px;letter-spacing:.15em;color:var(--accent);margin-left:14px;font-weight:400}
+  .author p{font-size:18.5px;line-height:1.9;color:var(--ink-soft);margin-bottom:10px}
+  .author a{color:var(--accent);border-bottom:1px solid var(--accent);text-decoration:none}
+  @media(max-width:700px){ .author{grid-template-columns:1fr} .author img{width:140px;height:140px} }
   .row-click.sel .graph-btn{background:var(--accent);color:var(--paper);border-color:var(--accent)}
   tr.chart-row td{background:var(--paper-warm);padding:20px 22px 24px}
   .chart-head{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:10px}
@@ -224,6 +231,16 @@
           <dt>直接／2段階先</dt><dd>「直接」は、原材料と品目の関係が統計ではっきり確認できたもの。「2段階先」は、間に別の品目をはさんで伝わる影響を、計算でつなげた目安。</dd>
           <dt>データから判断できません</dt><dd>その品目の値段が、原材料ではなく需要や個別の事情で決まっていることが多く、統計ではっきりした関係が見つからなかった、という意味。</dd>
         </dl>
+
+        <h3>このサイトを作っている人</h3>
+        <div class="author">
+          <img src="https://www.future-procurement.com/_18_6696.jpg" alt="坂口孝則">
+          <div>
+            <div class="author-name">坂口 孝則<span>未来調達研究所株式会社</span></div>
+            <p>大手メーカーの調達・購買部門出身。購買戦略やサプライチェーン改革など、幅広い業務領域を経験し、講演・執筆活動も多数。専門は調達・購買戦略、コスト削減、調達業務全般のアドバイス。コスト削減プロジェクトの主導、サプライヤマネジメントのコンサルティング、組織改革・組織教育のプロフェッショナルとして複数企業を担当しています。</p>
+            <p>このサイトは、日本銀行の公開統計を調達・購買の現場で使える形にしたいという思いから、未来調達研究所が制作・運営しています。調達部門の参謀役として伴走する<a href="https://www.future-procurement.com/komon.html" target="_blank" rel="noopener">顧問制度</a>や、研修・コンサルティングのご相談は<a href="https://www.future-procurement.com/contact/" target="_blank" rel="noopener">お問い合わせ</a>からどうぞ。</p>
+          </div>
+        </div>
 
         <h3>使うときの注意</h3>
         <p>・数字は<b>業界全体の平均</b>です。御社の個別の契約や、特定のサプライヤーの価格とは違うことがあります。<br>・<b>過去のパターンが今後も続く</b>と仮定した計算です。大きな環境変化があると外れることがあります。<br>・データは日本銀行の発表にあわせて<b>毎月更新</b>されます。画面上部の「最新データ」の月をご確認ください。</p>
