@@ -24,8 +24,8 @@ function doPost(e) {
   lock.waitLock(10000);
   try {
     const sh = getSheet_();
-    // 列: 登録日時 / メール / 取得元 / ページURL / ブラウザ
-    sh.appendRow([new Date(), email, p.source || "", p.page || "", p.ua || ""]);
+    // 列: 取得元 / 日時 / メールアドレス（既存シートの並びに合わせる）
+    sh.appendRow(["価格シミュレーション", new Date(), email]);
   } finally {
     lock.releaseLock();
   }
@@ -39,5 +39,5 @@ function doGet() {
 
 // エディタから実行してシートへの書き込み権限を承認するためのテスト関数
 function testAppend() {
-  getSheet_().appendRow([new Date(), "test@example.com", "テスト", "", ""]);
+  getSheet_().appendRow(["価格シミュレーション", new Date(), "test@example.com"]);
 }
