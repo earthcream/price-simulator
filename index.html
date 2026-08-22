@@ -19,27 +19,27 @@
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth}
-  body{background:var(--paper);color:var(--ink);font-family:var(--serif-jp);font-size:19px;line-height:1.8;-webkit-font-smoothing:antialiased;padding-bottom:120px;
+  body{background:var(--paper);color:var(--ink);font-family:var(--serif-jp);font-size:21px;line-height:1.8;-webkit-font-smoothing:antialiased;padding-bottom:120px;
        background-image:radial-gradient(circle at 20% 10%, rgba(122,138,94,.05) 0%, transparent 50%),radial-gradient(circle at 80% 90%, rgba(45,95,63,.04) 0%, transparent 50%)}
   .container{max-width:1280px;margin:0 auto;padding:0 36px}
   /* ===== マストヘッド ===== */
   header.masthead{padding:40px 0 26px;border-bottom:3px double var(--ink);margin-bottom:40px}
-  .mast-top{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);padding-bottom:12px;border-bottom:1px solid var(--rule);margin-bottom:26px;flex-wrap:wrap;gap:8px}
-  .mast-top span:first-child{color:var(--accent);font-weight:500}
+  .mast-top{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:13.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);padding-bottom:12px;border-bottom:1px solid var(--rule);margin-bottom:26px;flex-wrap:wrap;gap:8px}
+  .mast-top span:first-child{color:var(--accent);font-weight:700;font-family:var(--serif-jp);font-size:17px;letter-spacing:.1em}
   .title-row{display:flex;align-items:baseline;gap:22px;flex-wrap:wrap;margin-bottom:10px}
   h1{font-family:var(--serif-jp);font-size:44px;font-weight:800;letter-spacing:.01em;line-height:1.15;white-space:nowrap}
   .subtitle{font-family:var(--serif-jp);font-size:19px;font-weight:600;letter-spacing:.14em;color:var(--ink-soft);white-space:nowrap}
-  .tagline{font-size:17px;color:var(--ink-soft);max-width:900px;line-height:1.85;margin-bottom:16px}
-  .meta-line{display:flex;gap:22px;flex-wrap:wrap;align-items:center;font-size:15.5px;color:var(--ink-soft)}
+  .tagline{font-size:18.5px;color:var(--ink-soft);max-width:900px;line-height:1.85;margin-bottom:16px}
+  .meta-line{display:flex;gap:22px;flex-wrap:wrap;align-items:center;font-size:17px;color:var(--ink-soft)}
   .meta-line b{color:var(--ink);font-weight:700}
   .badge-live{font-family:var(--mono);font-size:11px;letter-spacing:.2em;background:var(--accent);color:var(--paper);padding:5px 14px;text-transform:uppercase}
   /* ===== 左ナビ＋本文 ===== */
   .layout{display:block}
-  aside{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:36px}
+  aside{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:36px}
   .nav-item{display:block;padding:14px 18px 12px;border:1.5px solid var(--ink);background:transparent;color:var(--ink);text-decoration:none;cursor:pointer;transition:all .2s;position:relative}
   .nav-item .no{font-family:var(--serif-en);font-style:italic;font-size:20px;color:var(--gold);display:block;line-height:1}
-  .nav-item .nm{font-size:19px;font-weight:700;display:block;line-height:1.4;margin-top:2px;white-space:nowrap}
-  .nav-item .ds{font-size:13px;color:var(--ink-mute);display:block;line-height:1.5}
+  .nav-item .nm{font-size:20px;font-weight:700;display:block;line-height:1.4;margin-top:2px;white-space:nowrap}
+  .nav-item .ds{font-size:14px;color:var(--ink-mute);display:block;line-height:1.5}
   .nav-item:hover{background:var(--paper-warm)}
   .nav-item.on{background:var(--ink);color:var(--paper)}
   .nav-item.on .no{color:var(--accent-bright)} .nav-item.on .ds{color:rgba(244,247,242,.7)}
@@ -49,19 +49,19 @@
   section.on{display:block}
   .section-label{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);display:inline-block;position:relative;padding-left:26px;margin-bottom:12px}
   .section-label::before{content:'';position:absolute;left:0;top:50%;width:16px;height:1px;background:var(--accent)}
-  h2{font-family:var(--serif-jp);font-size:31px;font-weight:700;line-height:1.35;margin-bottom:10px;letter-spacing:-.01em}
-  h3{font-family:var(--serif-jp);font-size:23px;font-weight:700;margin:30px 0 12px}
-  .deck{font-size:17px;color:var(--ink-soft);margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--rule);line-height:1.85}
-  .hint{font-size:15.5px;color:var(--ink-mute);margin:6px 0 18px}
+  h2{font-family:var(--serif-jp);font-size:33px;font-weight:700;line-height:1.35;margin-bottom:10px;letter-spacing:-.01em}
+  h3{font-family:var(--serif-jp);font-size:25px;font-weight:700;margin:30px 0 12px}
+  .deck{font-size:18.5px;color:var(--ink-soft);margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--rule);line-height:1.85}
+  .hint{font-size:17px;color:var(--ink-mute);margin:6px 0 18px}
   /* ===== 表 ===== */
-  table{border-collapse:collapse;width:100%;font-size:18px}
-  th{text-align:left;font-family:var(--mono);font-weight:400;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid var(--ink);padding:10px 10px;white-space:nowrap;line-height:1.5}
+  table{border-collapse:collapse;width:100%;font-size:19.5px}
+  th{text-align:left;font-family:var(--mono);font-weight:400;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid var(--ink);padding:10px 10px;white-space:nowrap;line-height:1.5}
   td{border-bottom:1px solid var(--rule);padding:12px 10px;vertical-align:top}
   td:first-child{min-width:270px}
   tr:last-child td{border-bottom:none}
   .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
   .fig{font-family:var(--serif-en);font-size:22px;font-weight:600}
-  .small{font-size:14.5px;color:var(--ink-mute)}
+  .small{font-size:16px;color:var(--ink-mute)}
   .chip{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.2em;padding:3px 9px;margin-right:9px;vertical-align:3px;white-space:nowrap;text-transform:uppercase}
   .chip.imp{background:var(--gold);color:var(--paper)}
   .chip.dom{background:var(--accent);color:var(--paper)}
@@ -71,25 +71,42 @@
   .row-click{cursor:pointer}
   .row-click:hover td{background:var(--paper-warm)}
   .row-click.sel td{background:#e3ede5}
-  .graph-btn,.print-btn,.btn-line{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;border:1px solid var(--ink);background:transparent;color:var(--ink);padding:7px 14px;cursor:pointer;white-space:nowrap;transition:all .2s}
+  .graph-btn,.print-btn,.btn-line{font-family:var(--mono);font-size:12.5px;letter-spacing:.15em;text-transform:uppercase;border:1px solid var(--ink);background:transparent;color:var(--ink);padding:7px 14px;cursor:pointer;white-space:nowrap;transition:all .2s}
   .graph-btn:hover,.print-btn:hover,.btn-line:hover{background:var(--ink);color:var(--paper)}
+  .btn-fill{font-family:var(--serif-jp);font-size:19px;font-weight:700;background:var(--accent);color:var(--paper);border:none;padding:14px 30px;cursor:pointer;transition:all .25s;box-shadow:0 4px 14px rgba(45,95,63,.25)}
+  .btn-fill:hover{background:var(--accent-deep);transform:translateY(-2px)}
+  .alert.open .btn-fill{background:var(--ink)}
+  .em{color:var(--up);font-weight:700;border-bottom:2px solid var(--up)}
+  .howto{background:var(--paper-warm);border-left:4px solid var(--accent);padding:18px 24px;margin:6px 0 26px;font-size:18px;line-height:1.9}
+  .howto b{color:var(--accent-deep)}
+  .howto ul{margin:6px 0 0 22px} .howto li{margin-bottom:4px}
+  .guide h3{margin-top:36px;padding-bottom:8px;border-bottom:1px solid var(--ink)}
+  .guide p{margin-bottom:14px;font-size:19.5px;line-height:1.95}
+  .guide .case{border:1px solid var(--rule);padding:20px 24px;margin-bottom:16px;background:#fbfcfa}
+  .guide .case .q{font-size:21px;font-weight:700;margin-bottom:6px}
+  .guide .case .q::before{content:'Q';font-family:var(--serif-en);font-style:italic;color:var(--gold);font-size:26px;margin-right:10px}
+  .guide .case .a{font-size:18.5px;line-height:1.9;color:var(--ink-soft)}
+  .guide .case .a b{color:var(--ink)}
+  .guide dl{display:grid;grid-template-columns:200px 1fr;gap:10px 20px;font-size:18.5px}
+  .guide dt{font-weight:700} .guide dd{color:var(--ink-soft);line-height:1.8}
+  .tab-link{color:var(--accent);font-weight:700;cursor:pointer;border-bottom:1px solid var(--accent)}
   .row-click.sel .graph-btn{background:var(--accent);color:var(--paper);border-color:var(--accent)}
   tr.chart-row td{background:var(--paper-warm);padding:20px 22px 24px}
   .chart-head{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:10px}
-  .chart-title{font-size:18px;line-height:1.7;flex:1 1 500px}
-  .chart-title .lead{color:var(--ink-soft);display:block;font-size:15.5px}
+  .chart-title{font-size:19.5px;line-height:1.7;flex:1 1 500px}
+  .chart-title .lead{color:var(--ink-soft);display:block;font-size:17px}
   .chart-head,.chart-box{position:sticky;left:0;max-width:calc(100vw - 120px)}
   .chart-box{overflow-x:auto}
   .scrollx{overflow-x:auto}
   svg text{font-family:var(--serif-jp)}
-  .legend{font-size:15px;color:var(--ink-soft);border-top:1px solid var(--rule);margin-top:14px;padding-top:12px;line-height:1.8}
+  .legend{font-size:16.5px;color:var(--ink-soft);border-top:1px solid var(--rule);margin-top:14px;padding-top:12px;line-height:1.8}
   /* ===== 注目品目 ===== */
   .alert{padding:30px 0 34px;border-bottom:1px solid var(--rule)}
   .alert:last-child{border-bottom:none}
   .alert-head{display:grid;grid-template-columns:auto 1fr auto;gap:8px 22px;align-items:baseline}
-  .alert-head .name{font-size:29px;font-weight:700;line-height:1.3}
+  .alert-head .name{font-size:32px;font-weight:700;line-height:1.3}
   .alert-head .name .chip{vertical-align:6px}
-  .alert-head .bigchg{font-family:var(--serif-en);font-style:italic;font-size:46px;font-weight:500;line-height:1;white-space:nowrap}
+  .alert-head .bigchg{font-family:var(--serif-en);font-style:italic;font-size:52px;font-weight:500;line-height:1;white-space:nowrap}
   .alert-head .cap{grid-column:1/-1;font-size:15px;color:var(--ink-mute)}
   .alert-chart{margin:16px 0 10px}
   .alert-tools{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
@@ -97,35 +114,35 @@
   .alert.open .alert-body{display:block}
   /* ===== 値動き検索 ===== */
   .rank-grid{display:grid;grid-template-columns:1fr 1fr;gap:36px}
-  .rank-grid h4{font-family:var(--serif-jp);font-size:19px;font-weight:700;margin-bottom:6px;padding-bottom:8px;border-bottom:1px solid var(--ink)}
-  .rank-grid table{font-size:17px}
+  .rank-grid h4{font-family:var(--serif-jp);font-size:21px;font-weight:700;margin-bottom:6px;padding-bottom:8px;border-bottom:1px solid var(--ink)}
+  .rank-grid table{font-size:19px}
   .rank-grid td{padding:9px 8px}
   .rank-grid td:first-child{min-width:0}
   .rank-no{font-family:var(--serif-en);font-style:italic;font-size:20px;color:var(--gold);width:36px}
   .seg{display:inline-flex;border:1px solid var(--ink)}
-  .seg button{font-family:var(--mono);font-size:11px;letter-spacing:.12em;background:transparent;border:none;border-right:1px solid var(--ink);padding:7px 14px;cursor:pointer;color:var(--ink)}
+  .seg button{font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;background:transparent;border:none;border-right:1px solid var(--ink);padding:7px 14px;cursor:pointer;color:var(--ink)}
   .seg button:last-child{border-right:none}
   .seg button.on{background:var(--ink);color:var(--paper)}
   .stats{display:flex;gap:34px;flex-wrap:wrap;margin:14px 0 8px}
-  .stat .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);display:block}
-  .stat .v{font-family:var(--serif-en);font-size:34px;font-weight:500;line-height:1.1}
+  .stat .k{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);display:block}
+  .stat .v{font-family:var(--serif-en);font-size:38px;font-weight:500;line-height:1.1}
   .stat .v.up{color:var(--up)} .stat .v.dn{color:var(--down)}
   .price-card{padding:22px 0 10px;border-top:1px solid var(--rule);margin-top:24px}
   /* ===== フォーム ===== */
-  input[type=text],input[type=number],input[type=email],select{font:inherit;font-family:var(--serif-jp);font-size:18px;padding:10px 14px;border:1px solid var(--rule);border-bottom:1px solid var(--ink);background:#fbfcfa;color:var(--ink)}
+  input[type=text],input[type=number],input[type=email],select{font:inherit;font-family:var(--serif-jp);font-size:19.5px;padding:10px 14px;border:1px solid var(--rule);border-bottom:1px solid var(--ink);background:#fbfcfa;color:var(--ink)}
   input[type=number]{width:120px;text-align:right;font-family:var(--serif-en);font-size:26px;font-weight:600}
   select{max-width:460px}
   .picker{display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin:14px 0 10px}
-  .picker label{font-size:16.5px;color:var(--ink-soft);display:flex;align-items:center;gap:10px}
+  .picker label{font-size:18px;color:var(--ink-soft);display:flex;align-items:center;gap:10px}
   .search-box{position:relative;display:inline-block}
   .search-box input[type=text]{width:330px}
   .sugg{position:absolute;top:100%;left:0;right:0;background:#fbfcfa;border:1px solid var(--rule);max-height:380px;overflow-y:auto;z-index:10;box-shadow:0 10px 24px rgba(26,38,32,.14);display:none}
-  .sugg div{padding:9px 14px;cursor:pointer;font-size:17px}
+  .sugg div{padding:9px 14px;cursor:pointer;font-size:18.5px}
   .sugg div:hover{background:var(--paper-warm)}
   .sugg .path{color:var(--ink-mute);font-size:13.5px;display:block}
-  .none-msg{border-left:2px solid var(--gold);padding:8px 18px;color:var(--ink-soft);font-size:17.5px}
+  .none-msg{border-left:2px solid var(--gold);padding:8px 18px;color:var(--ink-soft);font-size:19px}
   .rate-box{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 0;margin:10px 0 6px;font-size:21px;font-weight:600;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule)}
-  .route{color:var(--ink-soft);font-size:14.5px;display:block;margin-top:2px;font-weight:400}
+  .route{color:var(--ink-soft);font-size:16px;display:block;margin-top:2px;font-weight:400}
   .result-head{margin-top:30px;padding-top:24px;border-top:3px double var(--ink)}
   .loading{padding:60px;text-align:center;color:var(--ink-soft)}
   /* ===== 登録モーダル ===== */
@@ -143,10 +160,10 @@
   .gate-box .pp a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent)}
   .gate-box .cancel{display:block;margin-top:12px;font-size:14px;color:var(--ink-mute);cursor:pointer;text-decoration:underline}
   .gate-box .err{color:var(--up);font-size:15px;margin-bottom:8px;display:none}
-  footer.disclaimer{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:rgba(244,247,242,.85);font-size:14px;line-height:1.65;padding:12px 36px;z-index:50;border-top:3px double var(--paper-deep)}
+  footer.disclaimer{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:rgba(244,247,242,.85);font-size:15px;line-height:1.65;padding:12px 36px;z-index:50;border-top:3px double var(--paper-deep)}
   footer.disclaimer b{color:var(--paper)}
   main{min-width:0}
-  @media(max-width:960px){ aside{grid-template-columns:repeat(2,1fr)} .nav-item .ds{display:none} .nav-item .nm{white-space:normal} .rank-grid{grid-template-columns:1fr} }
+  @media(max-width:960px){ aside{grid-template-columns:repeat(2,1fr)} .guide dl{grid-template-columns:1fr} .nav-item .ds{display:none} .nav-item .nm{white-space:normal} .rank-grid{grid-template-columns:1fr} }
   @media(max-width:700px){ .container{padding:0 16px} body{font-size:17px} h1{font-size:30px;white-space:normal} .subtitle{white-space:normal} table{font-size:15.5px} th,td{padding:7px 6px}
     .search-box input[type=text]{width:100%} .gate-box{padding:28px 22px} .alert-head{grid-template-columns:1fr} .alert-head .bigchg{font-size:36px} }
 </style>
@@ -154,7 +171,7 @@
 <body>
 <div class="container">
   <header class="masthead">
-    <div class="mast-top"><span>Future Procurement Research Institute</span><span id="mastDate">Price Pass-through Simulator</span></div>
+    <div class="mast-top"><span><a href="https://www.future-procurement.com/" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">未来調達研究所</a></span><span id="mastDate">Price Pass-through Simulator</span></div>
     <div class="title-row"><h1>価格波及シミュレーター</h1><span class="subtitle">調達人材のための原材料価格影響把握</span></div>
     <p class="tagline">いま上がっている原材料はどれか。その動きが自社の調達品に「いつ・どれだけ」及ぶのか。日本銀行の企業物価指数40年分から目安を示します。社内説明や価格交渉の準備にお役立てください。各グラフは「印刷／PDF」でA4一枚に出力できます。</p>
     <div class="meta-line" id="metaLine">データ読み込み中…</div>
@@ -162,6 +179,7 @@
 
   <div class="layout">
     <aside id="nav">
+      <a class="nav-item" data-sec="howto"><span class="no">00</span><span class="nm">このサイトの使い方</span><span class="ds">はじめての方はこちら。何ができるか、どう使うか</span></a>
       <a class="nav-item on" data-sec="alerts"><span class="no">01</span><span class="nm">注目品目</span><span class="ds">最近大きく動いた原材料と、これから影響が出る調達品</span></a>
       <a class="nav-item" data-sec="prices"><span class="no">02</span><span class="nm">品目の値動き検索</span><span class="ds">いま上がっている・下がっている品目と、全品目の推移</span></a>
       <a class="nav-item" data-sec="search"><span class="no">03</span><span class="nm">調達品目からの検索<span class="rec">オススメ</span></span><span class="ds">この調達品は、何が上がると、いつ・どれだけ上がるか</span></a>
@@ -171,11 +189,56 @@
     <main>
       <div class="loading" id="loading">データを読み込んでいます…</div>
 
+
+      <!-- 00 使い方 -->
+      <section id="sec-howto" class="guide">
+        <div class="section-label">How to Use</div>
+        <h2>このサイトの使い方：原材料が上がったとき、自分の買っているモノはどうなるか</h2>
+        <div class="deck">むずかしい言葉は使いません。調達・購買のお仕事をしている方なら、どなたでも5分で使えます。</div>
+
+        <h3>このサイトは何をするものか</h3>
+        <p>日本銀行は毎月、「企業物価指数」という統計を発表しています。これは<b>「会社どうしで売り買いされるモノの値段が、上がったか下がったか」</b>を、鉄・プラスチック・紙・部品など約500品目について数字にしたものです。</p>
+        <p>このサイトは、その40年分のデータを使って、<b>「ある原材料が値上がりすると、それを使って作られるモノは、何ヶ月後に、何%くらい値上がりしてきたか」</b>を計算し、見やすく並べたものです。たとえば「原油が10%上がると、ナフサは3ヶ月後に約24%、ポリエチレンは1年後に約13%上がる」といったことが分かります。</p>
+        <p>計算はすべて<b>過去の実績の平均</b>です。未来を約束するものではなく、「過去はこうだった」という目安としてお使いください。</p>
+
+        <h3>こんなときは、こう使う</h3>
+        <div class="case"><div class="q">最近、何が値上がりしているのか知りたい</div>
+          <div class="a">→ <span class="tab-link" data-go="alerts">01 注目品目</span>を開いてください。ここ3ヶ月で珍しい動きをした原材料が、最初から並んでいます。もっと広く見たいときは<span class="tab-link" data-go="prices">02 品目の値動き検索</span>の「ランキング」で、上がった順・下がった順に見られます。</div></div>
+        <div class="case"><div class="q">自分が買っている部品や材料が、これから上がりそうか知りたい</div>
+          <div class="a">→ <span class="tab-link" data-go="search">03 調達品目からの検索</span>で、自分の買っている品目を選んでください。<b>その品目の値段を動かしてきた原材料</b>と、「原材料が10%上がったら、何ヶ月後に何%上がるか」が出ます。あわせて<span class="tab-link" data-go="prices">02</span>で、その原材料が今どう動いているかを確認すると、先が読めます。</div></div>
+        <div class="case"><div class="q">サプライヤーから「原材料が上がったので値上げしたい」と言われた。妥当か知りたい</div>
+          <div class="a">→ <span class="tab-link" data-go="search">03 調達品目からの検索</span>で、その品目を選び、「原材料が ◯% 上がったとき」に先方の言う上昇率を入れてください。<b>過去の平均ではどれくらい転嫁されてきたか</b>（予想幅つき）が出るので、先方の要求と比べる材料になります。ただし業界平均ですので、個別の契約とは違うことがあります。</div></div>
+        <div class="case"><div class="q">「鋼材が10%上がったら、うちの調達品はどうなる？」を社内に説明したい</div>
+          <div class="a">→ <span class="tab-link" data-go="sim">04 シミュレーター</span>で「熱延広幅帯鋼」などを選び、10%と入れてください。影響を受ける調達品が大きい順に並びます。各行の「グラフ」→「印刷／PDF」で<b>A4一枚の資料</b>になります（出典と注意書きも自動で入ります）。</div></div>
+        <div class="case"><div class="q">ある品目の値段が、ここ数年どう動いてきたか見たい</div>
+          <div class="a">→ <span class="tab-link" data-go="prices">02 品目の値動き検索</span>で品目を選んでください。1年〜15年のグラフと、1ヶ月前・3ヶ月前・1年前・5年前と比べた変化率が出ます。</div></div>
+
+        <h3>出てくる言葉の意味</h3>
+        <dl>
+          <dt>指数</dt><dd>2020年の平均の値段を「100」として、いまいくつかを表した数字。150なら2020年より5割高い、80なら2割安い。</dd>
+          <dt>変化率</dt><dd>前と比べて何%上がった（下がった）か。「3ヶ月前比 +20%」なら、3ヶ月前より2割高い。</dd>
+          <dt>転嫁率</dt><dd>原材料が1%上がったとき、それを使って作られる品目が何%上がるか。100%なら原材料の値上がりがそのまま乗る、50%なら半分だけ乗る。</dd>
+          <dt>影響が最大になる時期</dt><dd>原材料が動いてから、その影響がいちばん大きく出るまでの月数。「3ヶ月後」なら、3ヶ月かけて値段に反映される。</dd>
+          <dt>予想幅</dt><dd>「95%の確率でこの範囲に収まる」という見込みの幅。幅が広いほど、ばらつきが大きくて確実ではない。</dd>
+          <dt>上がるとき／下がるとき</dt><dd>原材料が上がる局面と下がる局面で、転嫁のされ方が違うことがあります（上がるときは早く大きく、下がるときは遅く小さく、など）。</dd>
+          <dt>直接／2段階先</dt><dd>「直接」は、原材料と品目の関係が統計ではっきり確認できたもの。「2段階先」は、間に別の品目をはさんで伝わる影響を、計算でつなげた目安。</dd>
+          <dt>データから判断できません</dt><dd>その品目の値段が、原材料ではなく需要や個別の事情で決まっていることが多く、統計ではっきりした関係が見つからなかった、という意味。</dd>
+        </dl>
+
+        <h3>使うときの注意</h3>
+        <p>・数字は<b>業界全体の平均</b>です。御社の個別の契約や、特定のサプライヤーの価格とは違うことがあります。<br>・<b>過去のパターンが今後も続く</b>と仮定した計算です。大きな環境変化があると外れることがあります。<br>・データは日本銀行の発表にあわせて<b>毎月更新</b>されます。画面上部の「最新データ」の月をご確認ください。</p>
+      </section>
+
       <!-- 01 注目品目 -->
       <section id="sec-alerts">
         <div class="section-label">Early Warning</div>
         <h2>注目品目：最近大きく動いた原材料と、これから影響が出る調達品</h2>
-        <div class="deck">直近3ヶ月で珍しい動きをした原材料・上流品目です。それぞれの値動きと、過去の波及パターンから予想される「どの調達品が・いつ・どれだけ動くか」を示します。</div>
+        <div class="deck"><span class="em">直近3ヶ月</span>で珍しい動きをした原材料・上流品目です。それぞれの値動きと、過去の波及パターンから予想される「どの調達品が・いつ・どれだけ動くか」を示します。</div>
+        <div class="howto"><b>このページの見方</b>
+          <ul><li>大きな数字は、その原材料の<b>直近3ヶ月の値動き</b>（赤＝上昇、青＝下落）。</li>
+          <li>その下のグラフは、その原材料の価格の推移（2020年の平均を100とした指数）。期間は1年〜15年で切り替えられます。</li>
+          <li>緑のボタン「影響を受ける調達品を見る」を押すと、<b>この原材料の値動きが、どの調達品に・いつごろ・どれくらい波及しそうか</b>の一覧が出ます。</li>
+          <li>一覧の「グラフ」を押すと月ごとの波及の様子、「印刷／PDF」でA4一枚の資料になります。</li></ul></div>
         <div id="alertList"></div>
       </section>
 
@@ -183,15 +246,20 @@
       <section id="sec-prices">
         <div class="section-label">Price Movements</div>
         <h2>品目の値動き検索：いま、何が上がって、何が下がっているか</h2>
-        <div class="deck">国内企業物価515品目と輸入物価210品目の直近の変化率ランキングと、品目ごとの推移グラフ。品目名を押すと推移が表示されます。</div>
-        <div class="picker"><label>ランキングの期間 <span class="seg" id="rankSeg"><button data-w="1">1ヶ月</button><button data-w="3" class="on">3ヶ月</button><button data-w="12">12ヶ月</button></span></label></div>
-        <div class="rank-grid"><div><h4>上昇トップ15</h4><table id="rankUp"></table></div><div><h4>下落トップ15</h4><table id="rankDn"></table></div></div>
+        <div class="deck">国内企業物価515品目と輸入物価210品目について、品目ごとの価格の推移と、直近の変化率ランキングを見られます。</div>
+        <div class="howto"><b>このページの見方</b>
+          <ul><li>まず下の「品目を選ぶ」で、気になる品目（例：銅、ナフサ、段ボール）を選ぶか、名前の一部を入力してください。その品目の<b>価格の推移グラフ</b>と、1ヶ月前・3ヶ月前・12ヶ月前・5年前と比べた変化率が出ます。</li>
+          <li>グラフの数字は「指数」です。<b>2020年の平均価格を100</b>として、いまいくつかを表します（150なら2020年より5割高い）。</li>
+          <li>さらに下には、直近で<b>大きく上がった品目・下がった品目のランキング</b>があります。品目名を押すと推移が見られます。</li></ul></div>
         <h3>品目を選んで推移を見る</h3>
         <div class="picker">
           <label>品目を選ぶ <select id="priceSelect"><option value="">― 分野から選ぶ ―</option></select></label>
           <label>または検索 <span class="search-box"><input type="text" id="priceInput" placeholder="例：銅、ナフサ、段ボール" autocomplete="off"><div class="sugg" id="priceSugg"></div></span></label>
         </div>
         <div id="priceArea"></div>
+        <h3>いま上がっている品目・下がっている品目（ランキング）</h3>
+        <div class="picker"><label>何ヶ月前と比べるか <span class="seg" id="rankSeg"><button data-w="1">1ヶ月</button><button data-w="3" class="on">3ヶ月</button><button data-w="12">12ヶ月</button></span></label></div>
+        <div class="rank-grid"><div><h4>上昇トップ15</h4><table id="rankUp"></table></div><div><h4>下落トップ15</h4><table id="rankDn"></table></div></div>
       </section>
 
       <!-- 03 調達品目からの検索 -->
@@ -199,6 +267,12 @@
         <div class="section-label">Search by Procurement Item</div>
         <h2>調達品目からの検索：この調達品は、何が上がると、いつ・どれだけ上がるか</h2>
         <div class="deck">調達品を選ぶと、その価格を動かしてきた原材料・上流品目と、「上流が◯%上がったら、この調達品は◯ヶ月後に◯%上がる」を表示します。</div>
+        <div class="howto"><b>このページの見方</b>
+          <ul><li>「調達品を選ぶ」で、<b>自分が買っている品目</b>（例：ワイヤーハーネス、段ボール、ボルト・ナット）を選んでください。</li>
+          <li>その調達品の価格を<b>過去に実際に動かしてきた原材料</b>が一覧で出ます。統計的にはっきり関係が確認できたものだけを載せています。</li>
+          <li>「原材料が ◯% 上がったとき」の数字を変えると、表の数字が連動します。<b>「そのときの変化幅」</b>が、この調達品が最大でどれくらい上がるかの目安、<b>「影響が最大になる時期」</b>が、それが何ヶ月後に来るかの目安です。</li>
+          <li>「予想幅」は、<b>95%の確率でこの範囲に収まる</b>という見込みの幅。幅が広いほど、ばらつきが大きい（確実ではない）ことを意味します。</li>
+          <li>「データから判断できません」と出る場合は、その調達品の価格が原材料以外（需要や個別事情）で決まっていることが多い、という意味です。</li></ul></div>
         <div class="picker">
           <label>調達品を選ぶ <select id="searchSelect"><option value="">― 分野から選ぶ ―</option></select></label>
           <label>または検索 <span class="search-box"><input type="text" id="searchInput" placeholder="例：ワイヤーハーネス、段ボール" autocomplete="off"><div class="sugg" id="searchSugg"></div></span></label>
@@ -211,6 +285,10 @@
         <div class="section-label">Simulator</div>
         <h2>シミュレーター：この品目が上がったら、何の調達品が・いつ・どれだけ上がるか</h2>
         <div class="deck">原材料・上流品目と価格の変化率を入力すると、影響を受ける調達品・時期・変化幅を表示します。直接の影響に加え、その先への連鎖（例：原油→ナフサ→エチレン→ポリエチレン）も経路つきで示します。</div>
+        <div class="howto"><b>このページの見方</b>
+          <ul><li>「上流品目を選ぶ」で<b>値上がりした（しそうな）原材料</b>を選び、「価格変化率」に何%上がるかを入れてください（下がる場合はマイナス）。</li>
+          <li><b>影響を受ける調達品</b>が、影響の大きい順に並びます。「直接」は統計ではっきり確認できた関係、「2段階先・3段階先」は「原油→ナフサ→ポリエチレン」のように間に品目をはさんで伝わる影響の目安です。</li>
+          <li>「グラフ」で月ごとの変化の様子、「印刷／PDF」でA4一枚の資料になります。社内での説明資料の下敷きにお使いください。</li></ul></div>
         <div class="picker">
           <label>上流品目を選ぶ <select id="simSelect"><option value="">― 分野から選ぶ ―</option></select></label>
           <label>または検索 <span class="search-box"><input type="text" id="simInput" placeholder="例：原油、熱延広幅帯鋼、銅" autocomplete="off"><div class="sugg" id="simSugg"></div></span></label>
@@ -243,7 +321,7 @@
 
 <script>
 "use strict";
-const EMAIL_ENDPOINT = "";   // Google Apps Script のウェブアプリURL（docs/メール登録の設定手順.md）
+const EMAIL_ENDPOINT = "https://script.google.com/macros/s/AKfycbz9blFjmjbRx8Lc2rTMxumUW9_CeIydv25PcGhVNENKoODo4XTcZfblmm36BkACOd8F/exec";   // Google Apps Script のウェブアプリURL（docs/メール登録の設定手順.md）
 const SITE_NAME = "価格波及シミュレーター（未来調達研究所）";
 const H = 12;
 let DB=null, PX=null, itemArr=[], driverIndex=new Map(), nameOf=new Map(), pathOf=new Map(), kindOf=new Map();
@@ -294,6 +372,7 @@ document.querySelectorAll(".nav-item").forEach(b => b.addEventListener("click", 
   showSec(b.dataset.sec);
 }));
 $("#gateCancel").addEventListener("click", () => $("#gate").classList.remove("on"));
+document.querySelectorAll(".tab-link").forEach(a => a.addEventListener("click", () => document.querySelector(`.nav-item[data-sec="${a.dataset.go}"]`).click()));
 $("#gateSubmit").addEventListener("click", submitEmail);
 $("#gateEmail").addEventListener("keydown", e => { if (e.key==="Enter") submitEmail(); });
 function submitEmail(){
@@ -459,7 +538,7 @@ function renderAlerts(){
         <div class="bigchg ${up?'chg-up':'chg-dn'}">${fmtPct(a.recent_change)}</div>
       </div>
       <div class="alert-chart" id="alertChart${i}"></div>
-      <div class="alert-tools"><button class="btn-line expand-btn" type="button" data-i="${i}">影響を受ける調達品を見る（${a.affected.length}品目）▼</button>
+      <div class="alert-tools"><button class="btn-fill expand-btn" type="button" data-i="${i}">▼ 影響を受ける調達品を見る（${a.affected.length}品目）</button>
         <span class="small">「グラフ」を押すと、その調達品の価格が月を追ってどう変わるかが表示されます。</span></div>
       <div class="alert-body">
         <table id="alertTable${i}"><thead><tr><th>影響を受ける調達品</th><th class="num">影響が最大になる時期</th><th class="num">そのときの変化幅</th><th class="num">12ヶ月後</th><th></th></tr></thead><tbody>${rows}</tbody></table>
@@ -476,7 +555,7 @@ function renderAlerts(){
   });
   document.querySelectorAll(".expand-btn").forEach(b => b.addEventListener("click", () => {
     const card = b.closest(".alert"), open = card.classList.toggle("open"), n = DB.alerts[+b.dataset.i].affected.length;
-    b.textContent = open ? "閉じる ▲" : `影響を受ける調達品を見る（${n}品目）▼`;
+    b.textContent = open ? "▲ 閉じる" : `▼ 影響を受ける調達品を見る（${n}品目）`;
   }));
   document.querySelector(".expand-btn").click();
 }
