@@ -1,0 +1,48 @@
+# 日銀の企業物価指数は毎月第8営業日ごろ公表される。
+# 余裕をみて毎月14日 09:00 JST（00:00 UTC）に fetch → estimate → コミットを実行する。
+# GitHub Pages（mainブランチ / ルート配信）を使っていれば、pushだけで自動デプロイされる。
+name: monthly-update
+
+on:
+  schedule:
+    - cron: "0 0 14 * *"
+  workflow_dispatch: {}   # 手動実行も可能にしておく
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: 依存パッケージのインストール
+        run: pip install -r requirements.txt
+
+      - name: 日銀データの取得
+        run: python scripts/fetch.py
+
+      - name: ローカル・プロジェクション推定
+        run: python scripts/estimate.py
+
+      - name: 値動き検索用の価格データ書き出し
+        run: python scripts/export_prices.py
+
+      - name: 変更があればコミットしてプッシュ
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/series_long.csv.gz data/items.csv data/fx.csv data/meta.json data/results.json data/prices.json
+          if git diff --cached --quiet; then
+            echo "変更なし（日銀の公表前の可能性）"
+          else
+            LATEST=$(python -c "import json;print(json.load(open('data/meta.json'))['latest_month'])")
+            git commit -m "データ更新: ${LATEST}"
+            git push
+          fi

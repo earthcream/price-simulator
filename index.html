@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>価格波及シミュレーター｜調達人材のための原材料価格影響把握</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&family=Shippori+Mincho:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1a2620; --ink-soft:#3a4a40; --ink-mute:#6f7d73;
+    --paper:#f4f7f2; --paper-warm:#e8efe4; --paper-deep:#dde6d6;
+    --accent:#2d5f3f; --accent-deep:#1f4530; --accent-bright:#4a8862; --rule:#c5d2bd; --gold:#7a8a5e;
+    --up:#9c3b2e; --down:#2a5f7a; --band:#cfdccf;
+    --serif-jp:'Shippori Mincho',"Hiragino Mincho ProN","Yu Mincho",serif;
+    --serif-en:'Cormorant Garamond',Georgia,serif;
+    --mono:'JetBrains Mono',Consolas,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--paper);color:var(--ink);font-family:var(--serif-jp);font-size:19px;line-height:1.8;-webkit-font-smoothing:antialiased;padding-bottom:120px;
+       background-image:radial-gradient(circle at 20% 10%, rgba(122,138,94,.05) 0%, transparent 50%),radial-gradient(circle at 80% 90%, rgba(45,95,63,.04) 0%, transparent 50%)}
+  .container{max-width:1280px;margin:0 auto;padding:0 36px}
+  /* ===== マストヘッド ===== */
+  header.masthead{padding:40px 0 26px;border-bottom:3px double var(--ink);margin-bottom:40px}
+  .mast-top{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);padding-bottom:12px;border-bottom:1px solid var(--rule);margin-bottom:26px;flex-wrap:wrap;gap:8px}
+  .mast-top span:first-child{color:var(--accent);font-weight:500}
+  .title-row{display:flex;align-items:baseline;gap:22px;flex-wrap:wrap;margin-bottom:10px}
+  h1{font-family:var(--serif-jp);font-size:44px;font-weight:800;letter-spacing:.01em;line-height:1.15;white-space:nowrap}
+  .subtitle{font-family:var(--serif-jp);font-size:19px;font-weight:600;letter-spacing:.14em;color:var(--ink-soft);white-space:nowrap}
+  .tagline{font-size:17px;color:var(--ink-soft);max-width:900px;line-height:1.85;margin-bottom:16px}
+  .meta-line{display:flex;gap:22px;flex-wrap:wrap;align-items:center;font-size:15.5px;color:var(--ink-soft)}
+  .meta-line b{color:var(--ink);font-weight:700}
+  .badge-live{font-family:var(--mono);font-size:11px;letter-spacing:.2em;background:var(--accent);color:var(--paper);padding:5px 14px;text-transform:uppercase}
+  /* ===== 左ナビ＋本文 ===== */
+  .layout{display:block}
+  aside{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:36px}
+  .nav-item{display:block;padding:14px 18px 12px;border:1.5px solid var(--ink);background:transparent;color:var(--ink);text-decoration:none;cursor:pointer;transition:all .2s;position:relative}
+  .nav-item .no{font-family:var(--serif-en);font-style:italic;font-size:20px;color:var(--gold);display:block;line-height:1}
+  .nav-item .nm{font-size:19px;font-weight:700;display:block;line-height:1.4;margin-top:2px;white-space:nowrap}
+  .nav-item .ds{font-size:13px;color:var(--ink-mute);display:block;line-height:1.5}
+  .nav-item:hover{background:var(--paper-warm)}
+  .nav-item.on{background:var(--ink);color:var(--paper)}
+  .nav-item.on .no{color:var(--accent-bright)} .nav-item.on .ds{color:rgba(244,247,242,.7)}
+  .nav-item.on::after{content:'';position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);border:8px solid transparent;border-top-color:var(--ink);border-bottom:0}
+  .rec{font-family:var(--mono);font-size:10px;letter-spacing:.2em;background:var(--up);color:#fff;padding:2px 8px;vertical-align:3px;margin-left:6px;white-space:nowrap}
+  section{display:none}
+  section.on{display:block}
+  .section-label{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);display:inline-block;position:relative;padding-left:26px;margin-bottom:12px}
+  .section-label::before{content:'';position:absolute;left:0;top:50%;width:16px;height:1px;background:var(--accent)}
+  h2{font-family:var(--serif-jp);font-size:31px;font-weight:700;line-height:1.35;margin-bottom:10px;letter-spacing:-.01em}
+  h3{font-family:var(--serif-jp);font-size:23px;font-weight:700;margin:30px 0 12px}
+  .deck{font-size:17px;color:var(--ink-soft);margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--rule);line-height:1.85}
+  .hint{font-size:15.5px;color:var(--ink-mute);margin:6px 0 18px}
+  /* ===== 表 ===== */
+  table{border-collapse:collapse;width:100%;font-size:18px}
+  th{text-align:left;font-family:var(--mono);font-weight:400;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid var(--ink);padding:10px 10px;white-space:nowrap;line-height:1.5}
+  td{border-bottom:1px solid var(--rule);padding:12px 10px;vertical-align:top}
+  td:first-child{min-width:270px}
+  tr:last-child td{border-bottom:none}
+  .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .fig{font-family:var(--serif-en);font-size:22px;font-weight:600}
+  .small{font-size:14.5px;color:var(--ink-mute)}
+  .chip{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.2em;padding:3px 9px;margin-right:9px;vertical-align:3px;white-space:nowrap;text-transform:uppercase}
+  .chip.imp{background:var(--gold);color:var(--paper)}
+  .chip.dom{background:var(--accent);color:var(--paper)}
+  .chip.tier{background:var(--paper-deep);color:var(--ink-soft)}
+  .chg-up{color:var(--up)} .chg-dn{color:var(--down)}
+  .impact-pos{color:var(--up)} .impact-neg{color:var(--down)}
+  .row-click{cursor:pointer}
+  .row-click:hover td{background:var(--paper-warm)}
+  .row-click.sel td{background:#e3ede5}
+  .graph-btn,.print-btn,.btn-line{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;border:1px solid var(--ink);background:transparent;color:var(--ink);padding:7px 14px;cursor:pointer;white-space:nowrap;transition:all .2s}
+  .graph-btn:hover,.print-btn:hover,.btn-line:hover{background:var(--ink);color:var(--paper)}
+  .row-click.sel .graph-btn{background:var(--accent);color:var(--paper);border-color:var(--accent)}
+  tr.chart-row td{background:var(--paper-warm);padding:20px 22px 24px}
+  .chart-head{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:10px}
+  .chart-title{font-size:18px;line-height:1.7;flex:1 1 500px}
+  .chart-title .lead{color:var(--ink-soft);display:block;font-size:15.5px}
+  .chart-head,.chart-box{position:sticky;left:0;max-width:calc(100vw - 120px)}
+  .chart-box{overflow-x:auto}
+  .scrollx{overflow-x:auto}
+  svg text{font-family:var(--serif-jp)}
+  .legend{font-size:15px;color:var(--ink-soft);border-top:1px solid var(--rule);margin-top:14px;padding-top:12px;line-height:1.8}
+  /* ===== 注目品目 ===== */
+  .alert{padding:30px 0 34px;border-bottom:1px solid var(--rule)}
+  .alert:last-child{border-bottom:none}
+  .alert-head{display:grid;grid-template-columns:auto 1fr auto;gap:8px 22px;align-items:baseline}
+  .alert-head .name{font-size:29px;font-weight:700;line-height:1.3}
+  .alert-head .name .chip{vertical-align:6px}
+  .alert-head .bigchg{font-family:var(--serif-en);font-style:italic;font-size:46px;font-weight:500;line-height:1;white-space:nowrap}
+  .alert-head .cap{grid-column:1/-1;font-size:15px;color:var(--ink-mute)}
+  .alert-chart{margin:16px 0 10px}
+  .alert-tools{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .alert-body{display:none;margin-top:16px;overflow-x:auto}
+  .alert.open .alert-body{display:block}
+  /* ===== 値動き検索 ===== */
+  .rank-grid{display:grid;grid-template-columns:1fr 1fr;gap:36px}
+  .rank-grid h4{font-family:var(--serif-jp);font-size:19px;font-weight:700;margin-bottom:6px;padding-bottom:8px;border-bottom:1px solid var(--ink)}
+  .rank-grid table{font-size:17px}
+  .rank-grid td{padding:9px 8px}
+  .rank-grid td:first-child{min-width:0}
+  .rank-no{font-family:var(--serif-en);font-style:italic;font-size:20px;color:var(--gold);width:36px}
+  .seg{display:inline-flex;border:1px solid var(--ink)}
+  .seg button{font-family:var(--mono);font-size:11px;letter-spacing:.12em;background:transparent;border:none;border-right:1px solid var(--ink);padding:7px 14px;cursor:pointer;color:var(--ink)}
+  .seg button:last-child{border-right:none}
+  .seg button.on{background:var(--ink);color:var(--paper)}
+  .stats{display:flex;gap:34px;flex-wrap:wrap;margin:14px 0 8px}
+  .stat .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);display:block}
+  .stat .v{font-family:var(--serif-en);font-size:34px;font-weight:500;line-height:1.1}
+  .stat .v.up{color:var(--up)} .stat .v.dn{color:var(--down)}
+  .price-card{padding:22px 0 10px;border-top:1px solid var(--rule);margin-top:24px}
+  /* ===== フォーム ===== */
+  input[type=text],input[type=number],input[type=email],select{font:inherit;font-family:var(--serif-jp);font-size:18px;padding:10px 14px;border:1px solid var(--rule);border-bottom:1px solid var(--ink);background:#fbfcfa;color:var(--ink)}
+  input[type=number]{width:120px;text-align:right;font-family:var(--serif-en);font-size:26px;font-weight:600}
+  select{max-width:460px}
+  .picker{display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin:14px 0 10px}
+  .picker label{font-size:16.5px;color:var(--ink-soft);display:flex;align-items:center;gap:10px}
+  .search-box{position:relative;display:inline-block}
+  .search-box input[type=text]{width:330px}
+  .sugg{position:absolute;top:100%;left:0;right:0;background:#fbfcfa;border:1px solid var(--rule);max-height:380px;overflow-y:auto;z-index:10;box-shadow:0 10px 24px rgba(26,38,32,.14);display:none}
+  .sugg div{padding:9px 14px;cursor:pointer;font-size:17px}
+  .sugg div:hover{background:var(--paper-warm)}
+  .sugg .path{color:var(--ink-mute);font-size:13.5px;display:block}
+  .none-msg{border-left:2px solid var(--gold);padding:8px 18px;color:var(--ink-soft);font-size:17.5px}
+  .rate-box{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 0;margin:10px 0 6px;font-size:21px;font-weight:600;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule)}
+  .route{color:var(--ink-soft);font-size:14.5px;display:block;margin-top:2px;font-weight:400}
+  .result-head{margin-top:30px;padding-top:24px;border-top:3px double var(--ink)}
+  .loading{padding:60px;text-align:center;color:var(--ink-soft)}
+  /* ===== 登録モーダル ===== */
+  .gate{position:fixed;inset:0;background:rgba(26,38,32,.6);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+  .gate.on{display:flex}
+  .gate-box{background:var(--paper);border:2px solid var(--ink);max-width:640px;width:100%;padding:44px 48px;position:relative;text-align:center}
+  .gate-box::before,.gate-box::after{content:'✦';position:absolute;left:50%;transform:translateX(-50%);background:var(--paper);padding:0 12px;color:var(--accent);font-size:16px}
+  .gate-box::before{top:-11px} .gate-box::after{bottom:-11px}
+  .gate-box h2{font-size:26px;margin:10px 0 14px}
+  .gate-box p{font-size:16.5px;color:var(--ink-soft);margin-bottom:22px;line-height:1.85}
+  .gate-box input[type=email]{width:100%;font-size:20px;margin-bottom:14px;text-align:center}
+  .gate-box .btn{display:block;width:100%;background:var(--ink);color:var(--paper);border:none;padding:17px;font-family:var(--mono);font-size:12px;letter-spacing:.25em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+  .gate-box .btn:hover{background:var(--accent);transform:translateY(-2px)}
+  .gate-box .pp{display:block;margin-top:18px;font-size:14.5px}
+  .gate-box .pp a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent)}
+  .gate-box .cancel{display:block;margin-top:12px;font-size:14px;color:var(--ink-mute);cursor:pointer;text-decoration:underline}
+  .gate-box .err{color:var(--up);font-size:15px;margin-bottom:8px;display:none}
+  footer.disclaimer{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:rgba(244,247,242,.85);font-size:14px;line-height:1.65;padding:12px 36px;z-index:50;border-top:3px double var(--paper-deep)}
+  footer.disclaimer b{color:var(--paper)}
+  main{min-width:0}
+  @media(max-width:960px){ aside{grid-template-columns:repeat(2,1fr)} .nav-item .ds{display:none} .nav-item .nm{white-space:normal} .rank-grid{grid-template-columns:1fr} }
+  @media(max-width:700px){ .container{padding:0 16px} body{font-size:17px} h1{font-size:30px;white-space:normal} .subtitle{white-space:normal} table{font-size:15.5px} th,td{padding:7px 6px}
+    .search-box input[type=text]{width:100%} .gate-box{padding:28px 22px} .alert-head{grid-template-columns:1fr} .alert-head .bigchg{font-size:36px} }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="masthead">
+    <div class="mast-top"><span>Future Procurement Research Institute</span><span id="mastDate">Price Pass-through Simulator</span></div>
+    <div class="title-row"><h1>価格波及シミュレーター</h1><span class="subtitle">調達人材のための原材料価格影響把握</span></div>
+    <p class="tagline">いま上がっている原材料はどれか。その動きが自社の調達品に「いつ・どれだけ」及ぶのか。日本銀行の企業物価指数40年分から目安を示します。社内説明や価格交渉の準備にお役立てください。各グラフは「印刷／PDF」でA4一枚に出力できます。</p>
+    <div class="meta-line" id="metaLine">データ読み込み中…</div>
+  </header>
+
+  <div class="layout">
+    <aside id="nav">
+      <a class="nav-item on" data-sec="alerts"><span class="no">01</span><span class="nm">注目品目</span><span class="ds">最近大きく動いた原材料と、これから影響が出る調達品</span></a>
+      <a class="nav-item" data-sec="prices"><span class="no">02</span><span class="nm">品目の値動き検索</span><span class="ds">いま上がっている・下がっている品目と、全品目の推移</span></a>
+      <a class="nav-item" data-sec="search"><span class="no">03</span><span class="nm">調達品目からの検索<span class="rec">オススメ</span></span><span class="ds">この調達品は、何が上がると、いつ・どれだけ上がるか</span></a>
+      <a class="nav-item" data-sec="sim"><span class="no">04</span><span class="nm">シミュレーター</span><span class="ds">この品目が上がったら、何の調達品が・いつ・どれだけ上がるか</span></a>
+    </aside>
+
+    <main>
+      <div class="loading" id="loading">データを読み込んでいます…</div>
+
+      <!-- 01 注目品目 -->
+      <section id="sec-alerts">
+        <div class="section-label">Early Warning</div>
+        <h2>注目品目：最近大きく動いた原材料と、これから影響が出る調達品</h2>
+        <div class="deck">直近3ヶ月で珍しい動きをした原材料・上流品目です。それぞれの値動きと、過去の波及パターンから予想される「どの調達品が・いつ・どれだけ動くか」を示します。</div>
+        <div id="alertList"></div>
+      </section>
+
+      <!-- 02 値動き検索 -->
+      <section id="sec-prices">
+        <div class="section-label">Price Movements</div>
+        <h2>品目の値動き検索：いま、何が上がって、何が下がっているか</h2>
+        <div class="deck">国内企業物価515品目と輸入物価210品目の直近の変化率ランキングと、品目ごとの推移グラフ。品目名を押すと推移が表示されます。</div>
+        <div class="picker"><label>ランキングの期間 <span class="seg" id="rankSeg"><button data-w="1">1ヶ月</button><button data-w="3" class="on">3ヶ月</button><button data-w="12">12ヶ月</button></span></label></div>
+        <div class="rank-grid"><div><h4>上昇トップ15</h4><table id="rankUp"></table></div><div><h4>下落トップ15</h4><table id="rankDn"></table></div></div>
+        <h3>品目を選んで推移を見る</h3>
+        <div class="picker">
+          <label>品目を選ぶ <select id="priceSelect"><option value="">― 分野から選ぶ ―</option></select></label>
+          <label>または検索 <span class="search-box"><input type="text" id="priceInput" placeholder="例：銅、ナフサ、段ボール" autocomplete="off"><div class="sugg" id="priceSugg"></div></span></label>
+        </div>
+        <div id="priceArea"></div>
+      </section>
+
+      <!-- 03 調達品目からの検索 -->
+      <section id="sec-search">
+        <div class="section-label">Search by Procurement Item</div>
+        <h2>調達品目からの検索：この調達品は、何が上がると、いつ・どれだけ上がるか</h2>
+        <div class="deck">調達品を選ぶと、その価格を動かしてきた原材料・上流品目と、「上流が◯%上がったら、この調達品は◯ヶ月後に◯%上がる」を表示します。</div>
+        <div class="picker">
+          <label>調達品を選ぶ <select id="searchSelect"><option value="">― 分野から選ぶ ―</option></select></label>
+          <label>または検索 <span class="search-box"><input type="text" id="searchInput" placeholder="例：ワイヤーハーネス、段ボール" autocomplete="off"><div class="sugg" id="searchSugg"></div></span></label>
+        </div>
+        <div id="detailArea"></div>
+      </section>
+
+      <!-- 04 シミュレーター -->
+      <section id="sec-sim">
+        <div class="section-label">Simulator</div>
+        <h2>シミュレーター：この品目が上がったら、何の調達品が・いつ・どれだけ上がるか</h2>
+        <div class="deck">原材料・上流品目と価格の変化率を入力すると、影響を受ける調達品・時期・変化幅を表示します。直接の影響に加え、その先への連鎖（例：原油→ナフサ→エチレン→ポリエチレン）も経路つきで示します。</div>
+        <div class="picker">
+          <label>上流品目を選ぶ <select id="simSelect"><option value="">― 分野から選ぶ ―</option></select></label>
+          <label>または検索 <span class="search-box"><input type="text" id="simInput" placeholder="例：原油、熱延広幅帯鋼、銅" autocomplete="off"><div class="sugg" id="simSugg"></div></span></label>
+          <label>価格変化率 <input type="number" id="simRate" value="10" step="1" min="-90" max="300"> %</label>
+        </div>
+        <div class="hint">▶ 表の「グラフ」を押すと、その調達品の価格が月を追ってどう変わるかが表示されます。</div>
+        <div id="simResult"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="gate" id="gate">
+  <div class="gate-box">
+    <div class="section-label">Registration</div>
+    <h2>シミュレーターのご利用にはメールアドレスの登録が必要です</h2>
+    <p>ご登録は初回の1回のみです。</p>
+    <div class="err" id="gateErr">メールアドレスの形式をご確認ください。</div>
+    <input type="email" id="gateEmail" placeholder="your@company.co.jp" autocomplete="email">
+    <button class="btn" id="gateSubmit" type="button">登録してシミュレーターを使う →</button>
+    <span class="pp"><a href="https://www.future-procurement.com/ppolicy/" target="_blank" rel="noopener">未来調達研究所株式会社プライバシーポリシーはこちら</a></span>
+    <span class="cancel" id="gateCancel">今回は登録しない（他の機能はそのまま使えます）</span>
+  </div>
+</div>
+
+<footer class="disclaimer"><div class="container">
+  <b>ご利用上の注意：</b>本サイトの数値は、日本銀行の企業物価指数をもとに、品目ごとの業界平均における過去の値上がり・値下がりの波及パターンから推定した目安であり、個別の取引価格を示すものではありません。
+  出典：日本銀行「時系列統計データ検索サイト」（企業物価指数・2020年基準／接続指数、外国為替相場）を未来調達研究所株式会社が加工して作成。
+</div></footer>
+
+<script>
+"use strict";
+const EMAIL_ENDPOINT = "";   // Google Apps Script のウェブアプリURL（docs/メール登録の設定手順.md）
+const SITE_NAME = "価格波及シミュレーター（未来調達研究所）";
+const H = 12;
+let DB=null, PX=null, itemArr=[], driverIndex=new Map(), nameOf=new Map(), pathOf=new Map(), kindOf=new Map();
+const CAT_ORDER = ["電気機器","電子部品・デバイス","情報通信機器","プラスチック製品","金属製品","鉄鋼","非鉄金属","化学製品","はん用機器","生産用機器","業務用機器","輸送用機器","窯業・土石製品","石油・石炭製品","パルプ・紙・同製品","木材・木製品","繊維製品","その他工業製品","電力・都市ガス・水道","鉱産物","スクラップ類","農林水産物","飲食料品"];
+const IMP_ORDER = ["電気・電子機器","金属・同製品","化学製品","石油・石炭・天然ガス","はん用・生産用・業務用機器","輸送用機器","その他産品・製品","木材・木製品・林産物","繊維品","飲食料品・食料用農水産物"];
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmtPct = (v, d=1) => (v>=0?"+":"") + v.toFixed(d) + "%";
+const cls = v => v>=0 ? "impact-pos" : "impact-neg";
+const tierLabel = t => t===1 ? "直接" : `${t}段階先`;
+const zLabel = z => Math.abs(z)>=3 ? "極めて珍しい動き" : Math.abs(z)>=2 ? "珍しい動き" : "やや珍しい動き";
+function monthLabel(yyyymm, add=0){ let y=Math.floor(yyyymm/100), m=yyyymm%100-1+add; y+=Math.floor(m/12); m=((m%12)+12)%12; return `${y}年${m+1}月`; }
+function dateLabel(iso){ const [y,m,d]=iso.split("-"); return `${y}年${+m}月${+d}日`; }
+function categoryOf(path){ const p=(path||"").split(">"); return p.length>1 ? p[1] : (p[0]||"その他"); }
+function catRank(cat, order){ const i=order.indexOf(cat); return i<0 ? 999 : i; }
+const chipOf = k => `<span class="chip ${k==='輸入'?'imp':'dom'}">${k}</span>`;
+
+// ===== 初期化 =====
+Promise.all([fetch("data/results.json").then(r=>r.json()), fetch("data/prices.json").then(r=>r.json())]).then(([db, px]) => {
+  DB = db; PX = px;
+  itemArr = Object.entries(db.items).map(([code, e]) => ({code, ...e}));
+  for (const it of itemArr){
+    nameOf.set(it.code, it.name); pathOf.set(it.code, it.path); kindOf.set(it.code, "国内");
+    for (const d of it.drivers){
+      if (!driverIndex.has(d.code)) driverIndex.set(d.code, []);
+      driverIndex.get(d.code).push({target: it, drv: d});
+      if (!nameOf.has(d.code)){ nameOf.set(d.code, d.name); pathOf.set(d.code, (db.paths && db.paths[d.code]) || ""); kindOf.set(d.code, d.kind); }
+    }
+  }
+  for (const [c, e] of Object.entries(px.items)){ if (!nameOf.has(c)){ nameOf.set(c, e.n); pathOf.set(c, e.p); kindOf.set(c, e.k); } }
+  const upd = db.meta.generated_at ? dateLabel(db.meta.generated_at) : monthLabel(db.meta.latest_month);
+  $("#metaLine").innerHTML = `<span>最新データ：<b>${monthLabel(db.meta.latest_month)}分</b></span><span>データ更新：<b>${upd}</b></span><span class="badge-live">Updated Monthly ／ 毎月更新</span><span>対象：国内515品目・輸入210品目</span>`;
+  if (db.meta.generated_at) $("#mastDate").textContent = "Updated " + db.meta.generated_at.replace(/-/g,".");
+  $("#loading").style.display = "none";
+  $("#sec-alerts").classList.add("on");
+  renderAlerts(); renderRanking(3); initPickers();
+}).catch(err => { $("#loading").textContent = "データの読み込みに失敗しました: " + err; });
+
+// ===== ナビ =====
+function showSec(name){
+  document.querySelectorAll(".nav-item").forEach(x => x.classList.toggle("on", x.dataset.sec===name));
+  document.querySelectorAll("main section").forEach(s => s.classList.toggle("on", s.id === "sec-" + name));
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+document.querySelectorAll(".nav-item").forEach(b => b.addEventListener("click", () => {
+  if (b.dataset.sec === "sim" && !localStorage.getItem("fp_email")){ $("#gate").classList.add("on"); $("#gateEmail").focus(); return; }
+  showSec(b.dataset.sec);
+}));
+$("#gateCancel").addEventListener("click", () => $("#gate").classList.remove("on"));
+$("#gateSubmit").addEventListener("click", submitEmail);
+$("#gateEmail").addEventListener("keydown", e => { if (e.key==="Enter") submitEmail(); });
+function submitEmail(){
+  const email = $("#gateEmail").value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){ $("#gateErr").style.display="block"; return; }
+  $("#gateErr").style.display="none";
+  localStorage.setItem("fp_email", email);
+  if (EMAIL_ENDPOINT){ fetch(EMAIL_ENDPOINT, {method:"POST", mode:"no-cors", body: new URLSearchParams({email, source: SITE_NAME, page: location.href, ua: navigator.userAgent})}).catch(()=>{}); }
+  $("#gate").classList.remove("on"); showSec("sim");
+}
+
+// ===== 値動きユーティリティ =====
+function seriesOf(code){ const e = PX.items[code]; return e ? e.v : null; }
+function lastIdx(v){ for (let i=v.length-1;i>=0;i--) if (v[i]!=null) return i; return -1; }
+function pctChange(v, w){ const i=lastIdx(v); if (i<w || v[i-w]==null) return null; return (v[i]/v[i-w]-1)*100; }
+
+// 値動きチャート（指数の推移）
+function priceChartSVG({months, vals, nMonths, label}){
+  const W=760, Hh=300, m={t:30,r:22,b:42,l:62};
+  const iw=W-m.l-m.r, ih=Hh-m.t-m.b;
+  const li = lastIdx(vals); const from = Math.max(0, li - nMonths + 1);
+  const xs = [], ys = [];
+  for (let i=from;i<=li;i++){ if (vals[i]!=null){ xs.push(i); ys.push(vals[i]); } }
+  if (ys.length < 2) return `<div class="none-msg">この期間のデータがありません。</div>`;
+  let ymin=Math.min(...ys), ymax=Math.max(...ys); const pad=(ymax-ymin)*0.12||1; ymin-=pad; ymax+=pad;
+  const X=i=>m.l+iw*(i-from)/Math.max(1,li-from), Y=v=>m.t+ih*(1-(v-ymin)/(ymax-ymin));
+  const step=niceStep((ymax-ymin)/5); let ticks=[]; for(let v=Math.ceil(ymin/step)*step; v<=ymax; v+=step) ticks.push(+v.toFixed(6));
+  const grid=ticks.map(v=>`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="#dde6d6"/><text x="${m.l-8}" y="${Y(v)+5}" text-anchor="end" font-size="13" fill="#6f7d73">${v.toFixed(step<1?1:0)}</text>`).join("");
+  // 年の目盛り（1月の位置）
+  let xt=""; const span=li-from; const every = span>120 ? 24 : span>48 ? 12 : span>18 ? 6 : 3;
+  for (let i=from;i<=li;i++){ const mm=months[i]%100, yy=Math.floor(months[i]/100); if ((every>=12 && mm===1 && yy%(every/12)===0) || (every<12 && (i-from)%every===0)) xt+=`<text x="${X(i)}" y="${Hh-16}" text-anchor="middle" font-size="13" fill="#6f7d73">${every>=12? Math.floor(months[i]/100)+"年" : monthLabel(months[i]).replace(/^\d{4}年/, span>18?"'"+String(months[i]).slice(2,4)+"/":"")}</text>`; }
+  const path=`M`+xs.map((i,k)=>`${X(i)},${Y(ys[k])}`).join(" L");
+  const area=path+` L${X(xs[xs.length-1])},${Y(ymin)} L${X(xs[0])},${Y(ymin)} Z`;
+  const pts=xs.map((i,k)=>`<circle cx="${X(i)}" cy="${Y(ys[k])}" r="${xs.length>60?2.2:3.5}" fill="#2d5f3f"/><circle cx="${X(i)}" cy="${Y(ys[k])}" r="10" fill="transparent"><title>${monthLabel(months[i])}: ${ys[k]}</title></circle>`).join("");
+  const lastv=ys[ys.length-1], lx=X(xs[xs.length-1]);
+  const lab=`<text x="${lx}" y="${Y(lastv)-12}" text-anchor="end" font-size="14" font-weight="700" fill="#1a2620">${monthLabel(months[li])} ${lastv}</text>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${Hh}" width="100%" style="max-width:${W}px">${grid}
+    <path d="${area}" fill="#2d5f3f" opacity="0.08"/><path d="${path}" fill="none" stroke="#2d5f3f" stroke-width="2.2"/>${pts}${lab}${xt}
+    <text transform="rotate(-90 16 ${(m.t+Hh-m.b)/2})" x="16" y="${(m.t+Hh-m.b)/2}" text-anchor="middle" font-size="13" fill="#3a4a40">${label||"指数（2020年＝100）"}</text></svg>`;
+}
+function niceStep(raw){ const p=Math.pow(10,Math.floor(Math.log10(raw))); for(const s of [1,2,5,10]) if(raw/p<=s) return s*p; return 10*p; }
+
+// 値動きカード（統計＋期間切替＋グラフ＋印刷）
+function priceCardHTML(code, id, defaultN=36){
+  const e = PX.items[code]; if (!e) return `<div class="none-msg">この品目の値動きデータがありません。</div>`;
+  const v = e.v, li = lastIdx(v);
+  const st = w => { const c = pctChange(v, w); return c==null ? "―" : fmtPct(c); };
+  const stc = w => { const c = pctChange(v, w); return c==null ? "" : (c>=0?"up":"dn"); };
+  return `<div class="price-card" id="${id}">
+    <div class="stats">
+      <div class="stat"><span class="k">最新 ${monthLabel(PX.months[li])}</span><span class="v">${v[li]}</span></div>
+      <div class="stat"><span class="k">1ヶ月前比</span><span class="v ${stc(1)}">${st(1)}</span></div>
+      <div class="stat"><span class="k">3ヶ月前比</span><span class="v ${stc(3)}">${st(3)}</span></div>
+      <div class="stat"><span class="k">12ヶ月前比</span><span class="v ${stc(12)}">${st(12)}</span></div>
+      <div class="stat"><span class="k">5年前比</span><span class="v ${stc(60)}">${st(60)}</span></div>
+    </div>
+    <div class="picker"><span class="seg" data-code="${code}">${[[12,"1年"],[36,"3年"],[60,"5年"],[180,"15年"]].map(([n,l])=>`<button data-n="${n}" class="${n===defaultN?'on':''}">${l}</button>`).join("")}</span>
+      <button class="print-btn" type="button" data-code="${code}">印刷／PDF（A4一枚）</button></div>
+    <div class="chart-box"><div class="pchart">${priceChartSVG({months: PX.months, vals: v, nMonths: defaultN})}</div></div>
+    <div class="small">指数は2020年平均＝100。国内品目は消費税を除く接続指数、輸入品目は円ベース。</div></div>`;
+}
+function wirePriceCard(root){
+  root.querySelectorAll(".seg[data-code] button").forEach(b => b.addEventListener("click", () => {
+    const seg=b.parentElement; seg.querySelectorAll("button").forEach(x=>x.classList.toggle("on", x===b));
+    seg.closest(".price-card").querySelector(".pchart").innerHTML = priceChartSVG({months: PX.months, vals: seriesOf(seg.dataset.code), nMonths: +b.dataset.n});
+  }));
+  root.querySelectorAll(".print-btn[data-code]").forEach(b => b.addEventListener("click", ev => {
+    ev.stopPropagation();
+    const code=b.dataset.code, v=seriesOf(code), li=lastIdx(v), n=+b.closest(".price-card").querySelector(".seg button.on").dataset.n;
+    const rows = []; for (let i=Math.max(0,li-23); i<=li; i++) rows.push(`<tr><td>${monthLabel(PX.months[i])}</td><td class="n">${v[i]??"―"}</td><td class="n">${i>0&&v[i]!=null&&v[i-1]!=null?fmtPct((v[i]/v[i-1]-1)*100):"―"}</td></tr>`);
+    const half = Math.ceil(rows.length/2);
+    openPrint({ title: `${nameOf.get(code)} の価格推移（企業物価指数）`, lead: `${kindOf.get(code)}品目 ／ ${pathOf.get(code)||""}。指数は2020年平均＝100。`,
+      kv: [["最新", `${v[li]}（${monthLabel(PX.months[li])}）`],["3ヶ月前比", pctChange(v,3)==null?"―":fmtPct(pctChange(v,3))],["12ヶ月前比", pctChange(v,12)==null?"―":fmtPct(pctChange(v,12))]],
+      svg: priceChartSVG({months: PX.months, vals: v, nMonths: n}),
+      tables: [`<table><tr><th>月</th><th class="n">指数</th><th class="n">前月比</th></tr>${rows.slice(0,half).join("")}</table>`, `<table><tr><th>月</th><th class="n">指数</th><th class="n">前月比</th></tr>${rows.slice(half).join("")}</table>`] });
+  }));
+}
+
+// ===== 印刷（A4一枚） =====
+function openPrint(p){
+  const html = `<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>${esc(p.title)}｜価格波及シミュレーター</title>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>@page{size:A4;margin:16mm 14mm} body{font-family:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;color:#1a2620;font-size:12.5px;line-height:1.6;margin:0}
+  .top{display:flex;justify-content:space-between;font-family:Consolas,monospace;font-size:10px;letter-spacing:.15em;color:#3a4a40;border-bottom:1px solid #c5d2bd;padding-bottom:6px;margin-bottom:12px}
+  h1{font-size:20px;font-weight:700;margin:0 0 4px;line-height:1.4} .lead{font-size:12.5px;color:#3a4a40;margin-bottom:10px}
+  .kv{display:flex;gap:26px;font-size:12.5px;margin-bottom:8px} .kv b{font-size:17px} svg{width:100%;max-width:600px;display:block;margin:4px auto 10px}
+  table{border-collapse:collapse;font-size:11px;width:100%} th,td{border-bottom:1px solid #dde6d6;padding:3px 8px;text-align:left} th{color:#3a4a40;font-weight:normal;border-bottom:2px solid #1a2620}
+  .n{text-align:right;font-variant-numeric:tabular-nums} .two{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}
+  .note{font-size:10.5px;color:#3a4a40;border-top:3px double #1a2620;margin-top:12px;padding-top:8px;line-height:1.55}
+  .btn{position:fixed;top:10px;right:10px;padding:8px 16px;background:#2d5f3f;color:#fff;border:none;font-size:14px;cursor:pointer} @media print{.btn{display:none}}</style></head><body>
+  <button class="btn" onclick="window.print()">印刷／PDF保存</button>
+  <div class="top"><span>FUTURE PROCUREMENT RESEARCH INSTITUTE</span><span>価格波及シミュレーター ／ ${esc(DB.meta.generated_at ? dateLabel(DB.meta.generated_at) : "")}</span></div>
+  <h1>${esc(p.title)}</h1><div class="lead">${esc(p.lead)}</div>
+  <div class="kv">${p.kv.map(([k,v])=>`<span>${esc(k)}：<b>${esc(v)}</b></span>`).join("")}</div>
+  ${p.svg}<div class="two">${p.tables.join("")}</div>
+  <div class="note"><b>ご利用上の注意：</b>本資料の数値は、日本銀行の企業物価指数をもとに、品目ごとの業界平均における過去の値上がり・値下がりの波及パターンから推定した目安であり、個別の取引価格を示すものではありません。出典：日本銀行「時系列統計データ検索サイト」（企業物価指数・2020年基準／接続指数、外国為替相場）を未来調達研究所株式会社が加工して作成。${esc(SITE_NAME)} ／ データ：${esc(monthLabel(DB.meta.latest_month))}分まで</div></body></html>`;
+  const w = window.open("", "_blank");
+  if (!w){ alert("ポップアップがブロックされました。ブラウザの設定で許可してください。"); return; }
+  w.document.open(); w.document.write(html); w.document.close();
+}
+function printImpact(p){
+  const row = h => `<tr><td>${h}ヶ月後</td><td class="n">${fmtPct(p.vals[h])}</td><td class="n">${p.lo?`${fmtPct(p.lo[h])} 〜 ${fmtPct(p.hi[h])}`:"―"}</td></tr>`;
+  const th = `<tr><th>時期</th><th class="n">変化</th><th class="n">予想幅（95%）</th></tr>`;
+  openPrint({ title: `${p.src} が ${fmtPct(p.rate,0)} 変化したとき、${p.dst} の価格はいつ・どれだけ動くか`,
+    lead: p.route ? `経路：${p.route}（各段階の推定をつなげた目安）` : `日本銀行・企業物価指数の過去データ（${p.sample||""}）から推定`,
+    kv: [["影響が最大になる時期", `${p.peak_h}ヶ月後`],["そのときの変化", fmtPct(p.vals[p.peak_h])],["12ヶ月後", fmtPct(p.vals[H])]],
+    svg: p.svg, tables: [`<table>${th}${[0,1,2,3,4,5,6].map(row).join("")}</table>`, `<table>${th}${[7,8,9,10,11,12].map(row).join("")}</table>`] });
+}
+
+// ===== 波及グラフ =====
+function impactChartSVG({vals, lo, hi, peak_h, ylabel="価格の変化（%）"}){
+  const W=720, Hh=320, m={t:28,r:20,b:46,l:62}; const iw=W-m.l-m.r, ih=Hh-m.t-m.b;
+  const ys=[...vals, ...(lo||[]), ...(hi||[]), 0]; let ymin=Math.min(...ys), ymax=Math.max(...ys); const pad=(ymax-ymin)*0.1||1; ymin-=pad; ymax+=pad;
+  const X=h=>m.l+iw*h/H, Y=v=>m.t+ih*(1-(v-ymin)/(ymax-ymin));
+  const step=niceStep((ymax-ymin)/5); let ticks=[]; for(let v=Math.ceil(ymin/step)*step; v<=ymax; v+=step) ticks.push(+v.toFixed(6));
+  const grid=ticks.map(v=>`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="#dde6d6"/><text x="${m.l-8}" y="${Y(v)+5}" text-anchor="end" font-size="13" fill="#6f7d73">${v.toFixed(step<1?1:0)}</text>`).join("");
+  const xt=[0,2,4,6,8,10,12].map(h=>`<text x="${X(h)}" y="${Hh-18}" text-anchor="middle" font-size="13" fill="#6f7d73">${h}</text>`).join("");
+  const band=(lo&&hi)?`<path d="M${hi.map((v,h)=>`${X(h)},${Y(v)}`).join(" L")} L${[...lo].reverse().map((v,i)=>`${X(H-i)},${Y(v)}`).join(" L")} Z" fill="#cfdccf" opacity="0.6"/>`:"";
+  const line=`M`+vals.map((v,h)=>`${X(h)},${Y(v)}`).join(" L");
+  const pts=vals.map((v,h)=>`<circle cx="${X(h)}" cy="${Y(v)}" r="4.5" fill="#2d5f3f"/><circle cx="${X(h)}" cy="${Y(v)}" r="14" fill="transparent"><title>${h}ヶ月後: ${fmtPct(v)}${lo?`（予想幅 ${fmtPct(lo[h])}〜${fmtPct(hi[h])}）`:""}</title></circle>`).join("");
+  const anchor = X(peak_h) > W-130 ? "end" : X(peak_h) < m.l+130 ? "start" : "middle";
+  const peak=`<line x1="${X(peak_h)}" x2="${X(peak_h)}" y1="${m.t}" y2="${Hh-m.b}" stroke="#9c3b2e" stroke-dasharray="4 3"/><text x="${X(peak_h)}" y="${m.t-9}" text-anchor="${anchor}" font-size="14" fill="#9c3b2e">影響が最大：${peak_h}ヶ月後 ${fmtPct(vals[peak_h])}</text>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${Hh}" width="100%" style="max-width:${W}px">${grid}<line x1="${m.l}" x2="${W-m.r}" y1="${Y(0)}" y2="${Y(0)}" stroke="#aab8a3"/>${band}<path d="${line}" fill="none" stroke="#2d5f3f" stroke-width="2.4"/>${peak}${pts}${xt}
+    <text x="${(m.l+W-m.r)/2}" y="${Hh-2}" text-anchor="middle" font-size="13" fill="#3a4a40">何ヶ月後か</text><text transform="rotate(-90 16 ${(m.t+Hh-m.b)/2})" x="16" y="${(m.t+Hh-m.b)/2}" text-anchor="middle" font-size="13" fill="#3a4a40">${ylabel}</text></svg>`;
+}
+function chartTitle(src, rate, dst, withBand, route){
+  const lead = `<b>${esc(src)}</b> が ${fmtPct(rate,0)} 変化したあと、<b>${esc(dst)}</b> の価格は月を追ってこのように変わると見込まれます。`;
+  const sub = (withBand ? "緑の帯は「95%の確率でこの範囲に収まる」という予想幅。" : "") + (route ? `経路：${route}（各段階の推定をつなげた目安）` : "");
+  return `${lead}<span class="lead">${sub}</span>`;
+}
+function attachRowCharts(tableEl, makeChart){
+  tableEl.querySelectorAll("tr.row-click").forEach(tr => tr.addEventListener("click", () => {
+    const open = tr.classList.contains("sel");
+    tableEl.querySelectorAll("tr.chart-row").forEach(x => x.remove());
+    tableEl.querySelectorAll("tr.row-click").forEach(x => x.classList.remove("sel"));
+    if (open) return;
+    tr.classList.add("sel");
+    const {title, svg, print} = makeChart(tr.dataset);
+    const row = document.createElement("tr"); row.className = "chart-row";
+    row.innerHTML = `<td colspan="${tr.children.length}"><div class="chart-head"><div class="chart-title">${title}</div><button class="print-btn" type="button">印刷／PDF（A4一枚）</button></div><div class="chart-box">${svg}</div></td>`;
+    row.querySelector(".print-btn").addEventListener("click", ev => { ev.stopPropagation(); printImpact({...print, svg}); });
+    tr.after(row); row.scrollIntoView({behavior:"smooth", block:"nearest"});
+  }));
+}
+const sampleStr = d => `${String(d.sample[0]).slice(0,4)}〜${String(d.sample[1]).slice(0,4)}年・${d.n_obs}ヶ月分`;
+
+// ===== 01 注目品目 =====
+function renderAlerts(){
+  const box = $("#alertList");
+  if (!DB.alerts.length){ box.innerHTML = `<div class="none-msg">直近のデータでは、珍しい動きをした原材料・上流品目はありません。</div>`; return; }
+  box.innerHTML = DB.alerts.map((a,i) => {
+    const up = a.recent_change >= 0;
+    const rows = a.affected.map((af,j) => `<tr class="row-click" data-i="${i}" data-j="${j}">
+        <td>${esc(af.name)}<span class="route">${esc(DB.items[af.code].path||"")}</span></td>
+        <td class="num">${monthLabel(DB.meta.latest_month, af.peak_h)}ごろ<br><span class="small">（${af.peak_h}ヶ月後）</span></td>
+        <td class="num ${cls(af.impact)}"><span class="fig">${fmtPct(af.impact)}</span></td>
+        <td class="num">${fmtPct(af.longrun_impact)}</td>
+        <td class="num"><button class="graph-btn" type="button">グラフ</button></td></tr>`).join("");
+    return `<div class="alert" id="alert${i}">
+      <div class="alert-head">
+        <div class="name">${chipOf(a.kind)}${esc(a.name)}</div>
+        <div class="small" style="align-self:center">直近${a.window}ヶ月の変化　<span title="統計的な異例度 z=${a.z}">（過去と比べて${zLabel(a.z)}）</span></div>
+        <div class="bigchg ${up?'chg-up':'chg-dn'}">${fmtPct(a.recent_change)}</div>
+      </div>
+      <div class="alert-chart" id="alertChart${i}"></div>
+      <div class="alert-tools"><button class="btn-line expand-btn" type="button" data-i="${i}">影響を受ける調達品を見る（${a.affected.length}品目）▼</button>
+        <span class="small">「グラフ」を押すと、その調達品の価格が月を追ってどう変わるかが表示されます。</span></div>
+      <div class="alert-body">
+        <table id="alertTable${i}"><thead><tr><th>影響を受ける調達品</th><th class="num">影響が最大になる時期</th><th class="num">そのときの変化幅</th><th class="num">12ヶ月後</th><th></th></tr></thead><tbody>${rows}</tbody></table>
+        <div class="legend">変化幅 ＝ ${esc(a.name)}の直近の変化率 × 過去データから推定した「転嫁率」（上流が1%動いたとき、この調達品が何%動くか）。過去のパターンが今回も繰り返されると仮定した目安です。</div>
+      </div></div>`;
+  }).join("");
+  DB.alerts.forEach((a,i) => {
+    const ch = $("#alertChart"+i); ch.innerHTML = priceCardHTML(a.code, "apc"+i, 36); wirePriceCard(ch);
+    attachRowCharts($("#alertTable"+i), ds => {
+      const af = a.affected[+ds.j], d = DB.items[af.code].drivers.find(x => x.code === a.code), r = a.recent_change;
+      const vals=d.elast.map(v=>v*r), lo=d.ci_lo.map(v=>v*r), hi=d.ci_hi.map(v=>v*r);
+      return { title: chartTitle(a.name, r, af.name, true), svg: impactChartSVG({vals, lo, hi, peak_h: d.peak_h}), print: {src:a.name, rate:r, dst:af.name, vals, lo, hi, peak_h:d.peak_h, sample: sampleStr(d)} };
+    });
+  });
+  document.querySelectorAll(".expand-btn").forEach(b => b.addEventListener("click", () => {
+    const card = b.closest(".alert"), open = card.classList.toggle("open"), n = DB.alerts[+b.dataset.i].affected.length;
+    b.textContent = open ? "閉じる ▲" : `影響を受ける調達品を見る（${n}品目）▼`;
+  }));
+  document.querySelector(".expand-btn").click();
+}
+
+// ===== 02 値動き検索 =====
+let priceSelected = null;
+function renderRanking(w){
+  const rows = [];
+  for (const [c,e] of Object.entries(PX.items)){ const li=lastIdx(e.v); if (li < PX.months.length-2) continue; const ch=pctChange(e.v,w); if (ch!=null) rows.push({code:c, ch}); }
+  rows.sort((a,b)=>b.ch-a.ch);
+  const tbl = (arr, sign) => arr.map((r,i)=>`<tr class="row-click" data-code="${r.code}"><td class="rank-no">${String(i+1).padStart(2,"0")}</td><td>${chipOf(kindOf.get(r.code))}${esc(nameOf.get(r.code))}<span class="route">${esc(pathOf.get(r.code)||"")}</span></td><td class="num ${sign}"><span class="fig">${fmtPct(r.ch)}</span></td></tr>`).join("");
+  $("#rankUp").innerHTML = tbl(rows.slice(0,15), "chg-up");
+  $("#rankDn").innerHTML = tbl(rows.filter(r=>r.ch<0).reverse().slice(0,15), "chg-dn");
+  document.querySelectorAll("#rankUp tr, #rankDn tr").forEach(tr => tr.addEventListener("click", () => showPrice(tr.dataset.code)));
+}
+$("#rankSeg").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { $("#rankSeg").querySelectorAll("button").forEach(x=>x.classList.toggle("on", x===b)); renderRanking(+b.dataset.w); }));
+function showPrice(code){
+  priceSelected = code; $("#priceSelect").value = code;
+  const area = $("#priceArea");
+  area.innerHTML = `<div class="result-head"><h2>${chipOf(kindOf.get(code))}${esc(nameOf.get(code))}</h2><div class="small">${esc(pathOf.get(code)||"")}</div>${priceCardHTML(code, "pc", 36)}</div>`;
+  wirePriceCard(area); area.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+// ===== プルダウン＋検索 =====
+function buildSelect(sel, pool){
+  const groups = new Map();
+  for (const it of pool){ const cat=categoryOf(it.path), key=it.kind==="輸入" ? "【輸入】"+cat : cat, rank=it.kind==="輸入" ? 1000+catRank(cat, IMP_ORDER) : catRank(cat, CAT_ORDER);
+    if (!groups.has(key)) groups.set(key, {rank, items:[]}); groups.get(key).items.push(it); }
+  for (const [g,{items}] of [...groups.entries()].sort((a,b)=>a[1].rank-b[1].rank)){ const og=document.createElement("optgroup"); og.label=g; for (const it of items){ const o=document.createElement("option"); o.value=it.code; o.textContent=it.name; og.appendChild(o); } sel.appendChild(og); }
+}
+function attachSuggest(inputSel, suggSel, pool, onPick){
+  const input=$(inputSel), sugg=$(suggSel);
+  input.addEventListener("input", () => {
+    const q=input.value.trim(); if (!q){ sugg.style.display="none"; return; }
+    const hit=pool.filter(it => it.name.includes(q) || (it.path||"").includes(q)).slice(0,40);
+    if (!hit.length){ sugg.style.display="none"; return; }
+    sugg.innerHTML = hit.map(it => `<div data-code="${it.code}">${esc(it.name)}<span class="path">${esc((it.kind==="輸入"?"輸入物価 / ":"")+it.path)}</span></div>`).join("");
+    sugg.style.display="block";
+    sugg.querySelectorAll("div[data-code]").forEach(d => d.addEventListener("mousedown", ev => { ev.preventDefault(); const it=pool.find(x=>x.code===d.dataset.code); input.value=it.name; sugg.style.display="none"; onPick(it); }));
+  });
+  input.addEventListener("blur", () => setTimeout(()=>sugg.style.display="none",150));
+}
+function initPickers(){
+  const searchPool = itemArr.map(it => ({...it, kind:"国内"}));
+  buildSelect($("#searchSelect"), searchPool);
+  $("#searchSelect").addEventListener("change", e => { const it=DB.items[e.target.value]; if (it) renderDetail({code:e.target.value, ...it}); });
+  attachSuggest("#searchInput", "#searchSugg", searchPool, it => { $("#searchSelect").value=it.code; renderDetail(it); });
+  const simPool = [...driverIndex.keys()].map(code => ({code, name: nameOf.get(code), path: pathOf.get(code)||"", kind: kindOf.get(code)}));
+  buildSelect($("#simSelect"), simPool);
+  $("#simSelect").addEventListener("change", e => { simSelected = simPool.find(x=>x.code===e.target.value)||null; renderSim(); });
+  attachSuggest("#simInput", "#simSugg", simPool, it => { simSelected=it; $("#simSelect").value=it.code; renderSim(); });
+  $("#simRate").addEventListener("input", renderSim);
+  const pricePool = Object.entries(PX.items).map(([code,e]) => ({code, name:e.n, path:e.p, kind:e.k}));
+  buildSelect($("#priceSelect"), pricePool);
+  $("#priceSelect").addEventListener("change", e => { if (e.target.value) showPrice(e.target.value); });
+  attachSuggest("#priceInput", "#priceSugg", pricePool, it => showPrice(it.code));
+}
+
+// ===== 03 調達品目からの検索 =====
+let detailItem = null;
+function renderDetail(it){
+  detailItem = it; const area = $("#detailArea");
+  const head = `<div class="result-head"><h2>${esc(it.name)}</h2><div class="small">${esc(it.path||"")}</div>`;
+  if (!it.drivers.length){
+    area.innerHTML = `${head}<div class="none-msg" style="margin-top:16px"><b>データから判断できません。</b>この調達品については、候補とした原材料・上流品目のいずれも、統計的にはっきりした波及関係を確認できませんでした（需要要因や個別要因が大きい、またはデータ期間が短い可能性があります）。</div>
+      ${it.insufficient.length ? `<h3>検討した候補</h3><table><tbody>${it.insufficient.map(x=>`<tr><td>${esc(x.name)}</td><td class="small">${esc(x.why)}</td></tr>`).join("")}</tbody></table>` : ""}
+      <h3>この調達品自体の値動き</h3>${priceCardHTML(it.code, "dpc", 36)}</div>`;
+    wirePriceCard(area); return;
+  }
+  area.innerHTML = `${head}
+    <div class="rate-box">原材料・上流品目が <input type="number" id="detailRate" value="10" step="1" min="-90" max="300"> % 上がったとき、${esc(it.name)} はどうなるか</div>
+    <div class="scrollx" id="detailTable"></div>
+    <div class="legend"><b>予想幅</b>：95%の確率でこの範囲に収まる、という見込みの幅。<b>上がるとき／下がるとき</b>：上流の価格が上昇している局面と下落している局面を分けて推定した12ヶ月後の値（同じ変化率で換算）。差が大きい品目は「上がるときは早く大きく、下がるときは遅く小さく」といったクセがあります。</div>
+    <h3>この調達品自体の値動き</h3>${priceCardHTML(it.code, "dpc", 36)}</div>`;
+  $("#detailRate").addEventListener("input", drawDetailTable);
+  wirePriceCard(area); drawDetailTable();
+}
+function drawDetailTable(){
+  const it=detailItem, r=parseFloat($("#detailRate").value); if (!isFinite(r)) return;
+  const rows = it.drivers.map((d,i) => `<tr class="row-click" data-i="${i}">
+      <td>${chipOf(d.kind)}${esc(d.name)}<span class="route">${esc(d.reason)}</span></td>
+      <td class="num">${d.peak_h}ヶ月後</td>
+      <td class="num ${cls(r*d.elast[d.peak_h])}"><span class="fig">${fmtPct(r*d.elast[d.peak_h])}</span><br><span class="small">予想幅 ${fmtPct(r*d.ci_lo[d.peak_h])}〜${fmtPct(r*d.ci_hi[d.peak_h])}</span></td>
+      <td class="num">${fmtPct(r*d.longrun)}<br><span class="small">予想幅 ${fmtPct(r*d.ci_lo[H])}〜${fmtPct(r*d.ci_hi[H])}</span></td>
+      <td class="num small">上がるとき ${fmtPct(r*d.up12)}<br>下がるとき ${fmtPct(r*d.dn12)}</td>
+      <td class="num small">${String(d.sample[0]).slice(0,4)}〜${String(d.sample[1]).slice(0,4)}年<br>（${d.n_obs}ヶ月分）</td>
+      <td class="num"><button class="graph-btn" type="button">グラフ</button></td></tr>`).join("");
+  $("#detailTable").innerHTML = `<table id="detailTbl"><thead><tr><th>原材料・上流品目（${fmtPct(r,0)}上がったら）</th><th class="num">影響が最大になる時期</th><th class="num">そのときの変化幅（予想幅）</th><th class="num">12ヶ月後（予想幅）</th><th class="num">上がるとき／下がるとき</th><th class="num">根拠データ</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+  attachRowCharts($("#detailTbl"), ds => { const d=it.drivers[+ds.i], vals=d.elast.map(v=>v*r), lo=d.ci_lo.map(v=>v*r), hi=d.ci_hi.map(v=>v*r);
+    return { title: chartTitle(d.name, r, it.name, true), svg: impactChartSVG({vals, lo, hi, peak_h: d.peak_h}), print: {src:d.name, rate:r, dst:it.name, vals, lo, hi, peak_h:d.peak_h, sample: sampleStr(d)} }; });
+}
+
+// ===== 04 シミュレーター =====
+function compose(c1, c2){ const out=new Array(H+1).fill(0); for (let h=0;h<=H;h++){ let s=0; for (let k=0;k<=h;k++){ const m1=c1[k]-(k>0?c1[k-1]:0); s+=m1*c2[h-k]; } out[h]=s; } return out; }
+const CHAIN_MIN = 0.15;
+function propagate(srcCode){
+  const best=new Map(); let frontier=[{code:srcCode, elast:null, route:[srcCode]}];
+  for (let tier=1; tier<=3; tier++){
+    const next=[];
+    for (const f of frontier) for (const {target, drv} of (driverIndex.get(f.code)||[])){
+      if (f.route.includes(target.code) || target.code===srcCode) continue;
+      if (tier>1 && drv.peak_elast < CHAIN_MIN) continue;
+      const elast = f.elast ? compose(f.elast, drv.elast) : drv.elast;
+      const peak = elast.reduce((a,v,i)=>Math.abs(v)>Math.abs(elast[a])?i:a, 0);
+      if (tier>1 && elast[peak] <= 0) continue;
+      const cand={code:target.code, elast, peak_h:peak, route:[...f.route, target.code], tier, ci_lo: tier===1?drv.ci_lo:null, ci_hi: tier===1?drv.ci_hi:null, drv: tier===1?drv:null};
+      if (tier===1 && drv.peak_elast < CHAIN_MIN){ if (!best.has(target.code)) best.set(target.code, cand); continue; }
+      const cur=best.get(target.code);
+      if (!cur || cur.tier>tier || (cur.tier===tier && Math.abs(elast[peak])>Math.abs(cur.elast[cur.peak_h]))){ best.set(target.code, cand); next.push(cand); }
+    }
+    frontier=next; if (!frontier.length) break;
+  }
+  return [...best.values()];
+}
+let simSelected = null;
+function renderSim(){
+  const it=simSelected, r=parseFloat($("#simRate").value), box=$("#simResult");
+  if (!it || !isFinite(r)){ box.innerHTML=""; return; }
+  const results = propagate(it.code);
+  if (!results.length){ box.innerHTML = `<div class="none-msg"><b>データから判断できません。</b>「${esc(it.name)}」の影響をはっきり受ける調達品は、今回の推定では確認できませんでした。</div>`; return; }
+  results.sort((a,b)=>Math.abs(b.elast[b.peak_h])-Math.abs(a.elast[a.peak_h]));
+  const nDirect=results.filter(x=>x.tier===1).length, routeOf = x => x.route.map(c=>nameOf.get(c)).join(" → ");
+  const rows = results.map((x,i) => { const pk=x.peak_h, v=r*x.elast[pk];
+    return `<tr class="row-click" data-i="${i}">
+      <td><span class="chip tier">${tierLabel(x.tier)}</span>${esc(nameOf.get(x.code))}<span class="route">${x.tier===1 ? esc(pathOf.get(x.code)||"") : "経路：" + esc(routeOf(x))}</span></td>
+      <td class="num">${pk}ヶ月後<br><span class="small">${monthLabel(DB.meta.latest_month,pk)}ごろ</span></td>
+      <td class="num ${cls(v)}"><span class="fig">${fmtPct(v)}</span>${x.ci_lo?`<br><span class="small">予想幅 ${fmtPct(r*x.ci_lo[pk])}〜${fmtPct(r*x.ci_hi[pk])}</span>`:`<br><span class="small">（連鎖の目安）</span>`}</td>
+      <td class="num">${fmtPct(r*x.elast[H])}${x.ci_lo?`<br><span class="small">予想幅 ${fmtPct(r*x.ci_lo[H])}〜${fmtPct(r*x.ci_hi[H])}</span>`:""}</td>
+      <td class="num"><button class="graph-btn" type="button">グラフ</button></td></tr>`; }).join("");
+  box.innerHTML = `<div class="result-head"><h2>${esc(it.name)} が ${fmtPct(r,0)} 変化した場合</h2><div class="small">影響を受ける調達品：直接 ${nDirect}品目、連鎖を含め ${results.length}品目</div>
+    <div class="scrollx" style="margin-top:12px"><table id="simTbl"><thead><tr><th>影響を受ける調達品</th><th class="num">影響が最大になる時期</th><th class="num">そのときの変化幅（予想幅）</th><th class="num">12ヶ月後</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="legend"><b>直接</b>＝統計的にはっきり確認できた直接の影響。<b>2段階先・3段階先</b>＝直接の影響を経路に沿ってつなげた目安で、予想幅は出しません（同じ調達品に複数の経路がある場合は、最も短く影響の大きい経路を採用）。<b>予想幅</b>＝95%の確率でこの範囲に収まる見込み。</div></div>`;
+  attachRowCharts($("#simTbl"), ds => { const x=results[+ds.i], vals=x.elast.map(v=>v*r), lo=x.ci_lo?x.ci_lo.map(v=>v*r):null, hi=x.ci_hi?x.ci_hi.map(v=>v*r):null, route=x.tier>1?routeOf(x):"";
+    return { title: chartTitle(it.name, r, nameOf.get(x.code), x.tier===1, esc(route)), svg: impactChartSVG({vals, lo, hi, peak_h: x.peak_h}), print: {src:it.name, rate:r, dst:nameOf.get(x.code), vals, lo, hi, peak_h:x.peak_h, route, sample: x.drv?sampleStr(x.drv):""} }; });
+}
+</script>
+</body>
+</html>
