@@ -384,11 +384,11 @@
 <div class="gate" id="gate">
   <div class="gate-box">
     <div class="section-label">Registration</div>
-    <h2>シミュレーターのご利用にはメールアドレスの登録が必要です</h2>
+    <h2 id="gateTitle">この機能のご利用にはメールアドレスの登録が必要です</h2>
     <p>ご登録は初回の1回のみです。</p>
     <div class="err" id="gateErr">メールアドレスの形式をご確認ください。</div>
     <input type="email" id="gateEmail" placeholder="your@company.co.jp" autocomplete="email">
-    <button class="btn" id="gateSubmit" type="button">登録してシミュレーターを使う →</button>
+    <button class="btn" id="gateSubmit" type="button">登録して使う →</button>
     <span class="pp"><a href="https://www.future-procurement.com/ppolicy/" target="_blank" rel="noopener">未来調達研究所株式会社プライバシーポリシーはこちら</a></span>
     <span class="cancel" id="gateCancel">今回は登録しない（他の機能はそのまま使えます）</span>
   </div>
@@ -443,13 +443,20 @@ Promise.all([fetch("data/results.json").then(r=>r.json()), fetch("data/prices.js
 }).catch(err => { $("#loading").textContent = "データの読み込みに失敗しました: " + err; });
 
 // ===== ナビ =====
+const hasEmail = () => !!localStorage.getItem("fp_email");
+let gateNext = null;   // 登録完了後に開くセクション
+function openGate(next){ gateNext = next || null; $("#gate").classList.add("on"); $("#gateEmail").focus(); }
+function lockBox(feature){
+  return `<div class="none-msg" style="margin:14px 0"><b>${esc(feature)}は、メールアドレスの登録（無料・初回のみ）でご利用いただけます。</b><br>
+    登録済みの方には表示されています。<button class="btn-line" type="button" onclick="openGate(null)" style="margin-top:10px">メールアドレスを登録して使う</button></div>`;
+}
 function showSec(name){
   document.querySelectorAll(".nav-item").forEach(x => x.classList.toggle("on", x.dataset.sec===name));
   document.querySelectorAll("main section").forEach(s => s.classList.toggle("on", s.id === "sec-" + name));
   window.scrollTo({top: 0, behavior: "smooth"});
 }
 document.querySelectorAll(".nav-item").forEach(b => b.addEventListener("click", () => {
-  if (b.dataset.sec === "sim" && !localStorage.getItem("fp_email")){ $("#gate").classList.add("on"); $("#gateEmail").focus(); return; }
+  if ((b.dataset.sec === "sim" || b.dataset.sec === "jetro") && !hasEmail()){ openGate(b.dataset.sec); return; }
   showSec(b.dataset.sec);
 }));
 $("#gateCancel").addEventListener("click", () => $("#gate").classList.remove("on"));
@@ -462,7 +469,10 @@ function submitEmail(){
   $("#gateErr").style.display="none";
   localStorage.setItem("fp_email", email);
   if (EMAIL_ENDPOINT){ fetch(EMAIL_ENDPOINT, {method:"POST", mode:"no-cors", body: new URLSearchParams({email, source: SITE_NAME, page: location.href, ua: navigator.userAgent})}).catch(()=>{}); }
-  $("#gate").classList.remove("on"); showSec("sim");
+  $("#gate").classList.remove("on");
+  renderWages(); initRomu();          // ロックされていた区画を描き直す
+  if (gateNext) showSec(gateNext);
+  gateNext = null;
 }
 
 // ===== 値動きユーティリティ =====
@@ -726,6 +736,7 @@ function initWages(){
   renderWages();
 }
 function renderWages(){
+  if (!hasEmail()){ $("#wageArea").innerHTML = lockBox("毎月の賃金データ"); return; }
   const sr = WG.series[wageKey], vals = wageVals(), months = WG.months;
   const yen = sr.unit === "円";
   const li = lastIdx(sr.vals);
@@ -808,6 +819,10 @@ function renderOcc(code){
 // ===== 05c 公共工事設計労務単価 =====
 function initRomu(){
   const r = LB.romu, sel = $("#romuSelect");
+  if (!hasEmail()){ $("#romuArea").innerHTML = lockBox("公共工事設計労務単価"); $("#romuTrend").innerHTML = ""; sel.parentElement.style.display = "none"; return; }
+  sel.parentElement.style.display = "";
+  sel.innerHTML = '<option value="">― 職種を選ぶ ―</option>';
+  $("#romuArea").innerHTML = "";
   for (let i=0;i<r.occupations.length;i++){ const op=document.createElement("option"); op.value=i; op.textContent=r.occupations[i]; sel.appendChild(op); }
   sel.addEventListener("change", e => { if (e.target.value!=="") renderRomu(+e.target.value); });
   // 全国全職種平均の推移
