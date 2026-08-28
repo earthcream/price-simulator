@@ -33,11 +33,14 @@ jobs:
           ESTAT_APP_ID: ${{ secrets.ESTAT_APP_ID }}
         run: python scripts/fetch_annual_labor.py
 
+      - name: JETRO海外賃金データの取得
+        run: python scripts/fetch_jetro.py
+
       - name: 変更があればコミットしてプッシュ
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/labor.json
+          git add data/labor.json data/jetro.json
           if git diff --cached --quiet; then
             echo "変更なし"
           else
