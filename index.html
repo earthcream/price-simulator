@@ -50,7 +50,10 @@
   .section-label{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);display:inline-block;position:relative;padding-left:26px;margin-bottom:12px}
   .section-label::before{content:'';position:absolute;left:0;top:50%;width:16px;height:1px;background:var(--accent)}
   h2{font-family:var(--serif-jp);font-size:33px;font-weight:700;line-height:1.35;margin-bottom:10px;letter-spacing:-.01em}
-  h3{font-family:var(--serif-jp);font-size:25px;font-weight:700;margin:30px 0 12px}
+  h3{font-family:var(--serif-jp);font-size:25px;font-weight:700;margin:58px 0 14px;padding-top:30px;border-top:1px solid var(--ink);position:relative}
+  h3::before{content:'';position:absolute;top:-1px;left:0;width:64px;height:3px;background:var(--accent)}
+  tr.chart-row h3, .gate-box h3{margin-top:0;padding-top:0;border-top:none}
+  .guide .case + h3, .picker + h3{margin-top:58px}
   .deck{font-size:18.5px;color:var(--ink-soft);margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--rule);line-height:1.85}
   .hint{font-size:17px;color:var(--ink-mute);margin:6px 0 18px}
   /* ===== 表 ===== */
@@ -156,6 +159,7 @@
   .rate-box{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 0;margin:10px 0 6px;font-size:21px;font-weight:600;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule)}
   .route{color:var(--ink-soft);font-size:16px;display:block;margin-top:2px;font-weight:400}
   .result-head{margin-top:30px;padding-top:24px;border-top:3px double var(--ink)}
+  .result-head h3{margin-top:34px;padding-top:0;border-top:none} .result-head h3::before{display:none}
   .loading{padding:60px;text-align:center;color:var(--ink-soft)}
   /* ===== 登録モーダル ===== */
   .gate{position:fixed;inset:0;background:rgba(26,38,32,.6);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
@@ -367,7 +371,7 @@
         <h2>海外の賃金：世界の工場のワーカーは、月いくらか</h2>
         <div class="deck">ジェトロ「投資関連コスト比較調査」による、世界111都市の製造業ワーカー（一般工職）の月額賃金（米ドル）です。海外調達先・生産移管先の労務費比較にお使いください。日本の都市も入っているので比較できます。</div>
         <div class="howto"><b>このページの見方</b>
-          <ul><li>金額は<b>製造業ワーカー（一般工職）の月額賃金・米ドル</b>。安い順に並んでいます。あわせてエンジニア（中堅技術者）・中間管理職（課長クラス）の月額も表示します。</li>
+          <ul><li>金額は<b>製造業ワーカー（一般工職）の月額賃金・米ドル</b>。安い順に並んでいます。「上昇率（約5年）」は過去の調査年度と比べた伸びで、<b>いま安くても伸びが速い都市</b>が一目でわかります。エンジニア・中間管理職の月額も併記。</li>
           <li>行を押すと、その都市の<b>名目賃金上昇率（直近3年）</b>と、過去の調査年度からの<b>ワーカー賃金の推移グラフ</b>（データのある都市のみ、2017年度ごろ〜）が出ます。いま安くても、上昇率が高い国はすぐ差が縮まります。</li>
           <li>調査時期は都市により異なります（各地域の年次調査）。あくまで日系企業への調査に基づく<b>目安</b>です。</li></ul></div>
         <div class="picker">
@@ -865,14 +869,25 @@ function renderJetro(){
   let list = JT.cities.filter(c => (jetroRegion==="すべて" || c.region===jetroRegion) &&
     (!jetroQ || c.city.includes(jetroQ) || c.country.includes(jetroQ)));
   list.sort((a,b) => (a.worker_usd??1e9) - (b.worker_usd??1e9));
-  const rows = list.map((c,i) => `<tr class="row-click jrow ${c.country==="日本"?'jp':''}" data-i="${i}">
+  const hist5 = c => {
+    const h = JH && JH.cities && JH.cities[c.city + "|" + c.country];
+    if (!h) return null;
+    const ys = Object.keys(h.series).map(Number).sort();
+    const ly = ys[ys.length-1];
+    const base = [...ys].reverse().find(y => y <= ly - 4);
+    if (base == null) return null;
+    return {pct: (h.series[ly]/h.series[base]-1)*100, from: base, to: ly};
+  };
+  const rows = list.map((c,i) => { const g = hist5(c);
+    return `<tr class="row-click jrow ${c.country==="日本"?'jp':''}" data-i="${i}">
       <td class="num rank-no">${String(i+1).padStart(2,"0")}</td>
       <td>${esc(c.city)}<span class="route">${esc(c.country)}／${esc(c.region)}</span></td>
       <td class="num"><span class="fig">${c.worker_usd!=null?usd(c.worker_usd):esc(c.worker_raw||"―")}</span></td>
+      <td class="num ${g?cls(g.pct):""}">${g?`<b>${fmtPct(g.pct,0)}</b><br><span class="small">${g.from}→${g.to}年度</span>`:"―"}</td>
       <td class="num">${usd(c.engineer_usd)}</td>
       <td class="num">${usd(c.manager_usd)}</td>
-      <td class="num small">${esc((c.survey||"").slice(0,13))}</td></tr>`).join("");
-  $("#jetroArea").innerHTML = `<table id="jetroTbl"><thead><tr><th></th><th>都市（国）</th><th class="num">ワーカー<br>（一般工職）月額</th><th class="num">エンジニア<br>（中堅技術者）</th><th class="num">中間管理職<br>（課長クラス）</th><th class="num">調査時期</th></tr></thead><tbody>${rows}</tbody></table>`;
+      <td class="num small">${esc((c.survey||"").slice(0,13))}</td></tr>`; }).join("");
+  $("#jetroArea").innerHTML = `<table id="jetroTbl"><thead><tr><th></th><th>都市（国）</th><th class="num">ワーカー<br>（一般工職）月額</th><th class="num">ワーカー賃金の<br>上昇率（約5年）</th><th class="num">エンジニア<br>（中堅技術者）</th><th class="num">中間管理職<br>（課長クラス）</th><th class="num">調査時期</th></tr></thead><tbody>${rows}</tbody></table>`;
   $("#jetroTbl").querySelectorAll("tr.jrow").forEach(tr => tr.addEventListener("click", () => {
     const open = tr.classList.contains("sel");
     $("#jetroTbl").querySelectorAll("tr.chart-row").forEach(x=>x.remove());
@@ -891,7 +906,7 @@ function renderJetro(){
         <div class="chart-box">${yearChartSVG({years: yrs, vals: yrs.map(y=>hrec.series[y]), label:"月額（米ドル）", unit:"ドル"})}</div>
         <div class="small">各年度の調査値。米ドル換算のため為替変動の影響を含みます。</div></div>`;
     }
-    row.innerHTML = `<td colspan="6"><div class="chart-title"><b>${esc(c.city)}（${esc(c.country)}）</b></div>
+    row.innerHTML = `<td colspan="7"><div class="chart-title"><b>${esc(c.city)}（${esc(c.country)}）</b></div>
       <div style="font-size:17px;line-height:1.9">名目賃金上昇率：${esc(c.growth||"―")}<br>
       <span class="small">換算レート：${esc(c.rate||"―")}／調査時期：${esc(c.survey||"―")}／出典：${esc((JT.regions[c.region]||{}).label||"")}</span></div>${hist}</td>`;
     tr.after(row);
