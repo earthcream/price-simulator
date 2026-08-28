@@ -36,11 +36,14 @@ jobs:
       - name: JETRO海外賃金データの取得
         run: python scripts/fetch_jetro.py
 
+      - name: JETRO海外賃金の時系列を再構築
+        run: python scripts/build_jetro_history.py
+
       - name: 変更があればコミットしてプッシュ
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/labor.json data/jetro.json
+          git add data/labor.json data/jetro.json data/jetro_history.json
           if git diff --cached --quiet; then
             echo "変更なし"
           else

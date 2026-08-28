@@ -368,7 +368,7 @@
         <div class="deck">ジェトロ「投資関連コスト比較調査」による、世界111都市の製造業ワーカー（一般工職）の月額賃金（米ドル）です。海外調達先・生産移管先の労務費比較にお使いください。日本の都市も入っているので比較できます。</div>
         <div class="howto"><b>このページの見方</b>
           <ul><li>金額は<b>製造業ワーカー（一般工職）の月額賃金・米ドル</b>。安い順に並んでいます。あわせてエンジニア（中堅技術者）・中間管理職（課長クラス）の月額も表示します。</li>
-          <li>行を押すと、その都市の<b>名目賃金上昇率（直近3年）</b>と換算レート・調査時期が出ます。いま安くても、上昇率が高い国はすぐ差が縮まります。</li>
+          <li>行を押すと、その都市の<b>名目賃金上昇率（直近3年）</b>と、過去の調査年度からの<b>ワーカー賃金の推移グラフ</b>（データのある都市のみ、2017年度ごろ〜）が出ます。いま安くても、上昇率が高い国はすぐ差が縮まります。</li>
           <li>調査時期は都市により異なります（各地域の年次調査）。あくまで日系企業への調査に基づく<b>目安</b>です。</li></ul></div>
         <div class="picker">
           <label>地域 <span class="seg" id="jetroSeg"></span></label>
@@ -404,7 +404,7 @@
 const EMAIL_ENDPOINT = "https://script.google.com/macros/s/AKfycbz9blFjmjbRx8Lc2rTMxumUW9_CeIydv25PcGhVNENKoODo4XTcZfblmm36BkACOd8F/exec";   // Google Apps Script のウェブアプリURL（docs/メール登録の設定手順.md）
 const SITE_NAME = "価格波及シミュレーター（未来調達研究所）";
 const H = 12;
-let DB=null, PX=null, WG=null, LB=null, JT=null, itemArr=[], driverIndex=new Map(), nameOf=new Map(), pathOf=new Map(), kindOf=new Map();
+let DB=null, PX=null, WG=null, LB=null, JT=null, JH=null, itemArr=[], driverIndex=new Map(), nameOf=new Map(), pathOf=new Map(), kindOf=new Map();
 const CAT_ORDER = ["電気機器","電子部品・デバイス","情報通信機器","プラスチック製品","金属製品","鉄鋼","非鉄金属","化学製品","はん用機器","生産用機器","業務用機器","輸送用機器","窯業・土石製品","石油・石炭製品","パルプ・紙・同製品","木材・木製品","繊維製品","その他工業製品","電力・都市ガス・水道","鉱産物","スクラップ類","農林水産物","飲食料品"];
 const IMP_ORDER = ["電気・電子機器","金属・同製品","化学製品","石油・石炭・天然ガス","はん用・生産用・業務用機器","輸送用機器","その他産品・製品","木材・木製品・林産物","繊維品","飲食料品・食料用農水産物"];
 const SVC_ORDER = ["運輸・郵便","諸サービス","情報通信","リース・レンタル","広告","不動産","金融・保険"];
@@ -422,8 +422,8 @@ function catRank(cat, order){ const i=order.indexOf(cat); return i<0 ? 999 : i; 
 const chipOf = k => `<span class="chip ${k==='輸入'?'imp':k==='サービス'?'svc':'dom'}">${k}</span>`;
 
 // ===== 初期化 =====
-Promise.all([fetch("data/results.json").then(r=>r.json()), fetch("data/prices.json").then(r=>r.json()), fetch("data/wages.json").then(r=>r.json()), fetch("data/labor.json").then(r=>r.json()), fetch("data/jetro.json").then(r=>r.json())]).then(([db, px, wg, lb, jt]) => {
-  DB = db; PX = px; WG = wg; LB = lb; JT = jt;
+Promise.all([fetch("data/results.json").then(r=>r.json()), fetch("data/prices.json").then(r=>r.json()), fetch("data/wages.json").then(r=>r.json()), fetch("data/labor.json").then(r=>r.json()), fetch("data/jetro.json").then(r=>r.json()), fetch("data/jetro_history.json").then(r=>r.json()).catch(()=>null)]).then(([db, px, wg, lb, jt, jh]) => {
+  DB = db; PX = px; WG = wg; LB = lb; JT = jt; JH = jh;
   itemArr = Object.entries(db.items).map(([code, e]) => ({code, ...e}));
   for (const it of itemArr){
     nameOf.set(it.code, it.name); pathOf.set(it.code, it.path); kindOf.set(it.code, "国内");
@@ -881,9 +881,19 @@ function renderJetro(){
     tr.classList.add("sel");
     const c = list[+tr.dataset.i];
     const row = document.createElement("tr"); row.className="chart-row";
+    // 過去年度のワーカー賃金推移（3時点以上ある都市のみ）
+    let hist = "";
+    const hrec = JH && JH.cities && JH.cities[c.city + "|" + c.country];
+    if (hrec){
+      const yrs = Object.keys(hrec.series).map(Number).sort();
+      const first = hrec.series[yrs[0]], last = hrec.series[yrs[yrs.length-1]];
+      hist = `<div style="margin-top:10px"><b>ワーカー月額賃金の推移</b>（${yrs[0]}年度 $${Math.round(first).toLocaleString()} → ${yrs[yrs.length-1]}年度 $${Math.round(last).toLocaleString()}、${fmtPct((last/first-1)*100,0)}）
+        <div class="chart-box">${yearChartSVG({years: yrs, vals: yrs.map(y=>hrec.series[y]), label:"月額（米ドル）", unit:"ドル"})}</div>
+        <div class="small">各年度の調査値。米ドル換算のため為替変動の影響を含みます。</div></div>`;
+    }
     row.innerHTML = `<td colspan="6"><div class="chart-title"><b>${esc(c.city)}（${esc(c.country)}）</b></div>
       <div style="font-size:17px;line-height:1.9">名目賃金上昇率：${esc(c.growth||"―")}<br>
-      <span class="small">換算レート：${esc(c.rate||"―")}／調査時期：${esc(c.survey||"―")}／出典：${esc((JT.regions[c.region]||{}).label||"")}</span></div></td>`;
+      <span class="small">換算レート：${esc(c.rate||"―")}／調査時期：${esc(c.survey||"―")}／出典：${esc((JT.regions[c.region]||{}).label||"")}</span></div>${hist}</td>`;
     tr.after(row);
   }));
 }

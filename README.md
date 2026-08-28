@@ -22,6 +22,7 @@
 | e-Stat API | 賃金構造基本統計調査 職種別賃金145職種（`scripts/fetch_annual_labor.py` → `data/labor.json`、年1回） | 2020年〜 |
 | 国交省PDF | 公共工事設計労務単価 50職種×47都道府県（同上、年1回） | 最新適用年＋全国平均推移2012年〜 |
 | JETRO Excel | 投資関連コスト比較調査：世界111都市のワーカー・エンジニア・管理職賃金（`scripts/fetch_jetro.py` → `data/jetro.json`、年1回・最新版を自動発見） | 最新年度 |
+| JETRO Excel（過去分） | ワーカー賃金の年度推移98都市（`scripts/build_jetro_history.py` → `data/jetro_history.json`、年1回全再構築） | 2016年度〜 |
 
 系列コードが両基準で共通のため、接続指数と現行系列を縦に結合して**最長559ヶ月**の系列を構築
 （465/515品目が1980年から利用可能）。すべて日本銀行「時系列統計データ検索サイト」の公開データ。
