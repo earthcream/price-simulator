@@ -35,7 +35,7 @@
   .badge-live{font-family:var(--mono);font-size:11px;letter-spacing:.2em;background:var(--accent);color:var(--paper);padding:5px 14px;text-transform:uppercase}
   /* ===== 左ナビ＋本文 ===== */
   .layout{display:block}
-  aside{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:36px}
+  aside{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:36px}
   .nav-item{display:block;padding:14px 18px 12px;border:1.5px solid var(--ink);background:transparent;color:var(--ink);text-decoration:none;cursor:pointer;transition:all .2s;position:relative}
   .nav-item .no{font-family:var(--serif-en);font-style:italic;font-size:20px;color:var(--gold);display:block;line-height:1}
   .nav-item .nm{font-size:20px;font-weight:700;display:block;line-height:1.4;margin-top:2px;white-space:nowrap}
@@ -192,6 +192,7 @@
       <a class="nav-item" data-sec="prices"><span class="no">02</span><span class="nm">品目の値動き検索</span><span class="ds">いま上がっている・下がっている品目と、全品目の推移</span></a>
       <a class="nav-item" data-sec="search"><span class="no">03</span><span class="nm">調達品目からの検索<span class="rec">オススメ</span></span><span class="ds">この調達品は、何が上がると、いつ・どれだけ上がるか</span></a>
       <a class="nav-item" data-sec="sim"><span class="no">04</span><span class="nm">シミュレーター</span><span class="ds">この品目が上がったら、何の調達品が・いつ・どれだけ上がるか</span></a>
+      <a class="nav-item" data-sec="wages"><span class="no">05</span><span class="nm">労務費・賃金</span><span class="ds">日本の賃金はいま、月いくらか。毎月更新</span></a>
     </aside>
 
     <main>
@@ -218,6 +219,8 @@
           <div class="a">→ <span class="tab-link" data-go="search">03 調達品目からの検索</span>で、その品目を選び、「原材料が ◯% 上がったとき」に先方の言う上昇率を入れてください。<b>過去の平均ではどれくらい転嫁されてきたか</b>（予想幅つき）が出るので、先方の要求と比べる材料になります。ただし業界平均ですので、個別の契約とは違うことがあります。</div></div>
         <div class="case"><div class="q">「鋼材が10%上がったら、うちの調達品はどうなる？」を社内に説明したい</div>
           <div class="a">→ <span class="tab-link" data-go="sim">04 シミュレーター</span>で「熱延広幅帯鋼」などを選び、10%と入れてください。影響を受ける調達品が大きい順に並びます。各行の「グラフ」→「印刷／PDF」で<b>A4一枚の資料</b>になります（出典と注意書きも自動で入ります）。</div></div>
+        <div class="case"><div class="q">労務費・人件費の相場観を知りたい</div>
+          <div class="a">→ <span class="tab-link" data-go="wages">05 労務費・賃金</span>で、日本の1人あたり月間給与（現金給与総額）の推移が見られます。サプライヤーから「人件費が上がっている」と言われたとき、実際にどれくらい上がっているかを確認する材料になります。</div></div>
         <div class="case"><div class="q">ある品目の値段が、ここ数年どう動いてきたか見たい</div>
           <div class="a">→ <span class="tab-link" data-go="prices">02 品目の値動き検索</span>で品目を選んでください。1年〜15年のグラフと、1ヶ月前・3ヶ月前・1年前・5年前と比べた変化率が出ます。</div></div>
 
@@ -315,6 +318,24 @@
         <div class="hint">▶ 表の「グラフ」を押すと、その調達品の価格が月を追ってどう変わるかが表示されます。</div>
         <div id="simResult"></div>
       </section>
+
+      <!-- 05 労務費・賃金 -->
+      <section id="sec-wages">
+        <div class="section-label">Labor Cost</div>
+        <h2>労務費・賃金：日本の賃金は、いま月いくらか</h2>
+        <div class="deck">厚生労働省「毎月勤労統計調査」の現金給与総額（1人あたり月額・名目）です。労務費の相場観づくり、サプライヤーの人件費上昇の説明を確認する材料にお使いください。</div>
+        <div class="howto"><b>このページの見方</b>
+          <ul><li><b>現金給与総額</b>＝基本給＋残業代＋ボーナスを含む、労働者1人あたりの月間給与の合計（税・社会保険料を引く前）。</li>
+          <li>月ごとの線がギザギザなのは<b>6月・12月のボーナス</b>のため。ならして見たいときは「12ヶ月平均」に切り替えてください。</li>
+          <li>「一般労働者」はフルタイム、「パートタイム」は短時間労働者。「賃金指数」は2020年を100とした水準です。実質賃金指数は物価の影響を除いたもの。</li>
+          <li>製造業・建設業など<b>産業別・職種別の賃金（とび工・左官の労務単価など）は今後追加予定</b>です。</li></ul></div>
+        <div class="picker">
+          <label>系列 <span class="seg" id="wageSeg"></span></label>
+          <label>表示 <span class="seg" id="wageMode"><button data-m="raw" class="on">月次</button><button data-m="ma">12ヶ月平均</button></span></label>
+          <label>期間 <span class="seg" id="wageSpan"><button data-n="36">3年</button><button data-n="60" class="on">5年</button><button data-n="120">10年</button><button data-n="999">全期間</button></span></label>
+        </div>
+        <div id="wageArea"></div>
+      </section>
     </main>
   </div>
 </div>
@@ -342,7 +363,7 @@
 const EMAIL_ENDPOINT = "https://script.google.com/macros/s/AKfycbz9blFjmjbRx8Lc2rTMxumUW9_CeIydv25PcGhVNENKoODo4XTcZfblmm36BkACOd8F/exec";   // Google Apps Script のウェブアプリURL（docs/メール登録の設定手順.md）
 const SITE_NAME = "価格波及シミュレーター（未来調達研究所）";
 const H = 12;
-let DB=null, PX=null, itemArr=[], driverIndex=new Map(), nameOf=new Map(), pathOf=new Map(), kindOf=new Map();
+let DB=null, PX=null, WG=null, itemArr=[], driverIndex=new Map(), nameOf=new Map(), pathOf=new Map(), kindOf=new Map();
 const CAT_ORDER = ["電気機器","電子部品・デバイス","情報通信機器","プラスチック製品","金属製品","鉄鋼","非鉄金属","化学製品","はん用機器","生産用機器","業務用機器","輸送用機器","窯業・土石製品","石油・石炭製品","パルプ・紙・同製品","木材・木製品","繊維製品","その他工業製品","電力・都市ガス・水道","鉱産物","スクラップ類","農林水産物","飲食料品"];
 const IMP_ORDER = ["電気・電子機器","金属・同製品","化学製品","石油・石炭・天然ガス","はん用・生産用・業務用機器","輸送用機器","その他産品・製品","木材・木製品・林産物","繊維品","飲食料品・食料用農水産物"];
 const SVC_ORDER = ["運輸・郵便","諸サービス","情報通信","リース・レンタル","広告","不動産","金融・保険"];
@@ -360,8 +381,8 @@ function catRank(cat, order){ const i=order.indexOf(cat); return i<0 ? 999 : i; 
 const chipOf = k => `<span class="chip ${k==='輸入'?'imp':k==='サービス'?'svc':'dom'}">${k}</span>`;
 
 // ===== 初期化 =====
-Promise.all([fetch("data/results.json").then(r=>r.json()), fetch("data/prices.json").then(r=>r.json())]).then(([db, px]) => {
-  DB = db; PX = px;
+Promise.all([fetch("data/results.json").then(r=>r.json()), fetch("data/prices.json").then(r=>r.json()), fetch("data/wages.json").then(r=>r.json())]).then(([db, px, wg]) => {
+  DB = db; PX = px; WG = wg;
   itemArr = Object.entries(db.items).map(([code, e]) => ({code, ...e}));
   for (const it of itemArr){
     nameOf.set(it.code, it.name); pathOf.set(it.code, it.path); kindOf.set(it.code, "国内");
@@ -377,7 +398,7 @@ Promise.all([fetch("data/results.json").then(r=>r.json()), fetch("data/prices.js
   if (db.meta.generated_at) $("#mastDate").textContent = "Updated " + db.meta.generated_at.replace(/-/g,".");
   $("#loading").style.display = "none";
   $("#sec-alerts").classList.add("on");
-  renderAlerts(); renderRanking(3); initPickers();
+  renderAlerts(); renderRanking(3); initPickers(); initWages();
 }).catch(err => { $("#loading").textContent = "データの読み込みに失敗しました: " + err; });
 
 // ===== ナビ =====
@@ -635,6 +656,64 @@ function initPickers(){
   buildSelect($("#priceSelect"), pricePool);
   $("#priceSelect").addEventListener("change", e => { if (e.target.value) showPrice(e.target.value); });
   attachSuggest("#priceInput", "#priceSugg", pricePool, it => showPrice(it.code));
+}
+
+// ===== 05 労務費・賃金 =====
+let wageKey = "total", wageMode = "raw", wageSpan = 60;
+const fmtYen = v => v==null ? "―" : Math.round(v).toLocaleString("ja-JP") + "円";
+function wageVals(){
+  const raw = WG.series[wageKey].vals;
+  if (wageMode === "raw") return raw;
+  // 12ヶ月移動平均（12ヶ月そろった月のみ）
+  return raw.map((_, i) => {
+    if (i < 11) return null;
+    const w = raw.slice(i-11, i+1);
+    if (w.some(x => x==null)) return null;
+    return w.reduce((a,b)=>a+b,0) / 12;
+  });
+}
+function initWages(){
+  const seg = $("#wageSeg");
+  seg.innerHTML = Object.entries(WG.series).map(([k,sr]) =>
+    `<button data-k="${k}" class="${k==='total'?'on':''}">${sr.label.replace(/（現金給与総額、2020年＝100）/,"").replace(/現金給与総額（(.+)）/,"$1")}</button>`).join("");
+  seg.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    seg.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); wageKey=b.dataset.k; renderWages(); }));
+  $("#wageMode").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    $("#wageMode").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); wageMode=b.dataset.m; renderWages(); }));
+  $("#wageSpan").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    $("#wageSpan").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); wageSpan=+b.dataset.n; renderWages(); }));
+  renderWages();
+}
+function renderWages(){
+  const sr = WG.series[wageKey], vals = wageVals(), months = WG.months;
+  const yen = sr.unit === "円";
+  const li = lastIdx(sr.vals);
+  const fmtV = v => yen ? fmtYen(v) : (v==null ? "―" : v.toFixed(1));
+  // 前年同月比など（季節性を避けて同月比較）
+  const cmp = y => { const j = months.indexOf(months[li] - y*100); if (j<0 || sr.vals[j]==null) return null; return (sr.vals[li]/sr.vals[j]-1)*100; };
+  const stat = y => { const c = cmp(y); return c==null ? "―" : fmtPct(c); };
+  const statc = y => { const c = cmp(y); return c==null ? "" : (c>=0?"up":"dn"); };
+  $("#wageArea").innerHTML = `
+    <div class="stats">
+      <div class="stat"><span class="k">最新 ${monthLabel(months[li])}</span><span class="v">${fmtV(sr.vals[li])}</span></div>
+      <div class="stat"><span class="k">前年同月比</span><span class="v ${statc(1)}">${stat(1)}</span></div>
+      <div class="stat"><span class="k">3年前同月比</span><span class="v ${statc(3)}">${stat(3)}</span></div>
+      <div class="stat"><span class="k">5年前同月比</span><span class="v ${statc(5)}">${stat(5)}</span></div>
+      <div class="stat"><span class="k">10年前同月比</span><span class="v ${statc(10)}">${stat(10)}</span></div>
+    </div>
+    <div class="picker"><button class="print-btn" id="wagePrint" type="button">印刷／PDF（A4一枚）</button></div>
+    <div class="chart-box">${priceChartSVG({months, vals, nMonths: wageSpan===999?months.length:wageSpan, label: yen?"1人あたり月額（円）":"指数（2020年＝100）"})}</div>
+    <div class="small">${esc(WG.source)}。データ更新：${esc(WG.updated)}。${wageMode==="ma"?"表示は12ヶ月移動平均。":"6月・12月の山はボーナスによるものです。"}</div>`;
+  $("#wagePrint").addEventListener("click", () => {
+    const rows = [];
+    for (let i=Math.max(0,li-23); i<=li; i++) rows.push(`<tr><td>${monthLabel(months[i])}</td><td class="n">${fmtV(sr.vals[i])}</td></tr>`);
+    const half = Math.ceil(rows.length/2);
+    openPrint({ title: `${sr.label} の推移（毎月勤労統計調査）`,
+      lead: WG.source,
+      kv: [["最新", `${fmtV(sr.vals[li])}（${monthLabel(months[li])}）`],["前年同月比", stat(1)],["5年前同月比", stat(5)]],
+      svg: priceChartSVG({months, vals, nMonths: wageSpan===999?months.length:wageSpan, label: yen?"1人あたり月額（円）":"指数（2020年＝100）"}),
+      tables: [`<table><tr><th>月</th><th class="n">値</th></tr>${rows.slice(0,half).join("")}</table>`, `<table><tr><th>月</th><th class="n">値</th></tr>${rows.slice(half).join("")}</table>`] });
+  });
 }
 
 // ===== 03 調達品目からの検索 =====

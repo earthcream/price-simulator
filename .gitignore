@@ -2,3 +2,4 @@ raw/
 __pycache__/
 check.txt
 .claude/
+.estat_appid

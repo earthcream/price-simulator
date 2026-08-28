@@ -34,11 +34,14 @@ jobs:
       - name: 値動き検索用の価格データ書き出し
         run: python scripts/export_prices.py
 
+      - name: 賃金データの取得（毎月勤労統計・統計ダッシュボードAPI）
+        run: python scripts/fetch_wages.py
+
       - name: 変更があればコミットしてプッシュ
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/series_long.csv.gz data/items.csv data/fx.csv data/meta.json data/results.json data/prices.json
+          git add data/series_long.csv.gz data/items.csv data/fx.csv data/meta.json data/results.json data/prices.json data/wages.json
           if git diff --cached --quiet; then
             echo "変更なし（日銀の公表前の可能性）"
           else
