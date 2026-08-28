@@ -19,6 +19,8 @@
 | `fm08_m_1.html` | 外国為替相場（ドル・円スポット月中平均） | 1973年1月〜最新 |
 | `sppi_m_jp.zip` / `sppilink.csv` | 企業向けサービス価格指数（物流運賃・倉庫・労働者派遣等146品目） | 1985年1月〜最新 |
 | 統計ダッシュボードAPI | 毎月勤労統計調査の現金給与総額・賃金指数（`scripts/fetch_wages.py` → `data/wages.json`） | 2012年1月〜最新 |
+| e-Stat API | 賃金構造基本統計調査 職種別賃金145職種（`scripts/fetch_annual_labor.py` → `data/labor.json`、年1回） | 2020年〜 |
+| 国交省PDF | 公共工事設計労務単価 50職種×47都道府県（同上、年1回） | 最新適用年＋全国平均推移2012年〜 |
 
 系列コードが両基準で共通のため、接続指数と現行系列を縦に結合して**最長559ヶ月**の系列を構築
 （465/515品目が1980年から利用可能）。すべて日本銀行「時系列統計データ検索サイト」の公開データ。
@@ -49,6 +51,7 @@
 
 - 日銀の公表は毎月第8営業日ごろ。GitHub Actions（`.github/workflows/monthly-update.yml`）が
   毎月14日に fetch → estimate → `data/results.json` 更新 → push（GitHub Pagesが自動再デプロイ）
+- 年1回の労務費データは `.github/workflows/yearly-update.yml`（3月・12月に自動試行、失敗時は通知→[docs/年次データの更新手順.md](docs/年次データの更新手順.md)）
 - 5年ごとの基準改定は自動対応しない → [docs/基準改定時の手動作業手順.md](docs/基準改定時の手動作業手順.md)
 
 ## ローカルでの実行

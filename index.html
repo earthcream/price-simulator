@@ -91,6 +91,9 @@
   .guide dl{display:grid;grid-template-columns:200px 1fr;gap:10px 20px;font-size:18.5px}
   .guide dt{font-weight:700} .guide dd{color:var(--ink-soft);line-height:1.8}
   .tab-link{color:var(--accent);font-weight:700;cursor:pointer;border-bottom:1px solid var(--accent)}
+  .romu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px 18px;margin:14px 0}
+  .romu-cell{display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:5px 2px;font-size:17px}
+  .romu-cell span{color:var(--ink-soft)} .romu-cell b{font-variant-numeric:tabular-nums}
   .author{display:grid;grid-template-columns:180px 1fr;gap:28px;align-items:start;border:1px solid var(--rule);padding:24px 28px;background:#fbfcfa}
   .author img{width:180px;height:180px;object-fit:cover;border:1px solid var(--rule)}
   .author-name{font-size:26px;font-weight:700;margin-bottom:8px}
@@ -328,13 +331,29 @@
           <ul><li><b>現金給与総額</b>＝基本給＋残業代＋ボーナスを含む、労働者1人あたりの月間給与の合計（税・社会保険料を引く前）。</li>
           <li>月ごとの線がギザギザなのは<b>6月・12月のボーナス</b>のため。ならして見たいときは「12ヶ月平均」に切り替えてください。</li>
           <li>「一般労働者」はフルタイム、「パートタイム」は短時間労働者。「賃金指数」は2020年を100とした水準です。実質賃金指数は物価の影響を除いたもの。</li>
-          <li>製造業・建設業など<b>産業別・職種別の賃金（とび工・左官の労務単価など）は今後追加予定</b>です。</li></ul></div>
+          <li>このページの下には、<b>職種別の賃金</b>（機械技術者・金属プレス従事者など145職種、年1回更新）と、<b>公共工事設計労務単価</b>（とび工・左官など50職種×47都道府県、年1回更新）もあります。</li></ul></div>
         <div class="picker">
           <label>系列 <span class="seg" id="wageSeg"></span></label>
           <label>表示 <span class="seg" id="wageMode"><button data-m="raw" class="on">月次</button><button data-m="ma">12ヶ月平均</button></span></label>
           <label>期間 <span class="seg" id="wageSpan"><button data-n="36">3年</button><button data-n="60" class="on">5年</button><button data-n="120">10年</button><button data-n="999">全期間</button></span></label>
         </div>
         <div id="wageArea"></div>
+
+        <h3>職種別の賃金（賃金構造基本統計調査・年1回更新）</h3>
+        <div class="hint">機械技術者、金属工作機械作業従事者、営業・販売事務従事者など145職種の「きまって支給する現金給与額（月額）」と「年間賞与」。企業規模計・男女計。外注単価や技術者単価の相場観づくりに。</div>
+        <div class="picker">
+          <label>職種を選ぶ <select id="occSelect"><option value="">― 職種を選ぶ ―</option></select></label>
+          <label>または検索 <span class="search-box"><input type="text" id="occInput" placeholder="例：機械技術者、溶接、運搬" autocomplete="off"><div class="sugg" id="occSugg"></div></span></label>
+        </div>
+        <div id="occArea"></div>
+
+        <h3>公共工事設計労務単価（国土交通省・年1回更新）</h3>
+        <div class="hint">公共工事の積算に使われる職種別・都道府県別の労務単価（1日8時間あたり・円）。とび工・左官・電工・溶接工など50職種。建設系の外注労務費の目安になります。</div>
+        <div class="picker">
+          <label>職種を選ぶ <select id="romuSelect"><option value="">― 職種を選ぶ ―</option></select></label>
+        </div>
+        <div id="romuArea"></div>
+        <div class="legend" id="romuTrend"></div>
       </section>
     </main>
   </div>
@@ -363,7 +382,7 @@
 const EMAIL_ENDPOINT = "https://script.google.com/macros/s/AKfycbz9blFjmjbRx8Lc2rTMxumUW9_CeIydv25PcGhVNENKoODo4XTcZfblmm36BkACOd8F/exec";   // Google Apps Script のウェブアプリURL（docs/メール登録の設定手順.md）
 const SITE_NAME = "価格波及シミュレーター（未来調達研究所）";
 const H = 12;
-let DB=null, PX=null, WG=null, itemArr=[], driverIndex=new Map(), nameOf=new Map(), pathOf=new Map(), kindOf=new Map();
+let DB=null, PX=null, WG=null, LB=null, itemArr=[], driverIndex=new Map(), nameOf=new Map(), pathOf=new Map(), kindOf=new Map();
 const CAT_ORDER = ["電気機器","電子部品・デバイス","情報通信機器","プラスチック製品","金属製品","鉄鋼","非鉄金属","化学製品","はん用機器","生産用機器","業務用機器","輸送用機器","窯業・土石製品","石油・石炭製品","パルプ・紙・同製品","木材・木製品","繊維製品","その他工業製品","電力・都市ガス・水道","鉱産物","スクラップ類","農林水産物","飲食料品"];
 const IMP_ORDER = ["電気・電子機器","金属・同製品","化学製品","石油・石炭・天然ガス","はん用・生産用・業務用機器","輸送用機器","その他産品・製品","木材・木製品・林産物","繊維品","飲食料品・食料用農水産物"];
 const SVC_ORDER = ["運輸・郵便","諸サービス","情報通信","リース・レンタル","広告","不動産","金融・保険"];
@@ -381,8 +400,8 @@ function catRank(cat, order){ const i=order.indexOf(cat); return i<0 ? 999 : i; 
 const chipOf = k => `<span class="chip ${k==='輸入'?'imp':k==='サービス'?'svc':'dom'}">${k}</span>`;
 
 // ===== 初期化 =====
-Promise.all([fetch("data/results.json").then(r=>r.json()), fetch("data/prices.json").then(r=>r.json()), fetch("data/wages.json").then(r=>r.json())]).then(([db, px, wg]) => {
-  DB = db; PX = px; WG = wg;
+Promise.all([fetch("data/results.json").then(r=>r.json()), fetch("data/prices.json").then(r=>r.json()), fetch("data/wages.json").then(r=>r.json()), fetch("data/labor.json").then(r=>r.json())]).then(([db, px, wg, lb]) => {
+  DB = db; PX = px; WG = wg; LB = lb;
   itemArr = Object.entries(db.items).map(([code, e]) => ({code, ...e}));
   for (const it of itemArr){
     nameOf.set(it.code, it.name); pathOf.set(it.code, it.path); kindOf.set(it.code, "国内");
@@ -398,7 +417,7 @@ Promise.all([fetch("data/results.json").then(r=>r.json()), fetch("data/prices.js
   if (db.meta.generated_at) $("#mastDate").textContent = "Updated " + db.meta.generated_at.replace(/-/g,".");
   $("#loading").style.display = "none";
   $("#sec-alerts").classList.add("on");
-  renderAlerts(); renderRanking(3); initPickers(); initWages();
+  renderAlerts(); renderRanking(3); initPickers(); initWages(); initOcc(); initRomu();
 }).catch(err => { $("#loading").textContent = "データの読み込みに失敗しました: " + err; });
 
 // ===== ナビ =====
@@ -714,6 +733,81 @@ function renderWages(){
       svg: priceChartSVG({months, vals, nMonths: wageSpan===999?months.length:wageSpan, label: yen?"1人あたり月額（円）":"指数（2020年＝100）"}),
       tables: [`<table><tr><th>月</th><th class="n">値</th></tr>${rows.slice(0,half).join("")}</table>`, `<table><tr><th>月</th><th class="n">値</th></tr>${rows.slice(half).join("")}</table>`] });
   });
+}
+
+// ===== 05b 職種別の賃金（賃金構造基本統計） =====
+function yearChartSVG({years, vals, label, unit="円"}){
+  const W=720, Hh=280, m={t:28,r:24,b:40,l:74};
+  const iw=W-m.l-m.r, ih=Hh-m.t-m.b;
+  const pts = years.map((y,i)=>[y, vals[i]]).filter(x=>x[1]!=null);
+  if (pts.length < 2) return "";
+  const ys = pts.map(x=>x[1]);
+  let ymin=Math.min(...ys), ymax=Math.max(...ys); const pad=(ymax-ymin)*0.15||1; ymin-=pad; ymax+=pad;
+  const X=y=>m.l+iw*(y-years[0])/Math.max(1, years[years.length-1]-years[0]);
+  const Y=v=>m.t+ih*(1-(v-ymin)/(ymax-ymin));
+  const step=niceStep((ymax-ymin)/4); let ticks=[]; for(let v=Math.ceil(ymin/step)*step; v<=ymax; v+=step) ticks.push(v);
+  const grid=ticks.map(v=>`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="#dde6d6"/><text x="${m.l-8}" y="${Y(v)+5}" text-anchor="end" font-size="13" fill="#6f7d73">${Math.round(v).toLocaleString()}</text>`).join("");
+  const xt=years.filter((y,i)=>years.length<=8||i%2===0||i===years.length-1).map(y=>`<text x="${X(y)}" y="${Hh-14}" text-anchor="middle" font-size="13" fill="#6f7d73">${y}</text>`).join("");
+  const line=`M`+pts.map(([y,v])=>`${X(y)},${Y(v)}`).join(" L");
+  const dots=pts.map(([y,v])=>`<circle cx="${X(y)}" cy="${Y(v)}" r="4.5" fill="#2d5f3f"/><circle cx="${X(y)}" cy="${Y(v)}" r="13" fill="transparent"><title>${y}年: ${Math.round(v).toLocaleString()}${unit}</title></circle>`).join("");
+  const last=pts[pts.length-1];
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${Hh}" width="100%" style="max-width:${W}px">${grid}
+    <path d="${line}" fill="none" stroke="#2d5f3f" stroke-width="2.4"/>${dots}${xt}
+    <text x="${X(last[0])}" y="${Y(last[1])-12}" text-anchor="end" font-size="14" font-weight="700" fill="#1a2620">${last[0]}年 ${Math.round(last[1]).toLocaleString()}${unit}</text>
+    <text transform="rotate(-90 16 ${(m.t+Hh-m.b)/2})" x="16" y="${(m.t+Hh-m.b)/2}" text-anchor="middle" font-size="13" fill="#3a4a40">${label}</text></svg>`;
+}
+function initOcc(){
+  const ws = LB.wage_struct;
+  const sel = $("#occSelect");
+  for (const o of ws.occupations){ const op=document.createElement("option"); op.value=o.code; op.textContent=o.name; sel.appendChild(op); }
+  sel.addEventListener("change", e => { if (e.target.value) renderOcc(e.target.value); });
+  const pool = ws.occupations.map(o => ({code:o.code, name:o.name, path:"賃金構造基本統計", kind:"職種"}));
+  attachSuggest("#occInput", "#occSugg", pool, it => { sel.value=it.code; renderOcc(it.code); });
+}
+function renderOcc(code){
+  const ws = LB.wage_struct, o = ws.occupations.find(x=>x.code===code);
+  const yrs = ws.years, li = o.kimatte.map((v,i)=>v!=null?i:-1).filter(i=>i>=0).pop();
+  const kim = o.kimatte[li], bon = o.bonus[li];
+  const annual = kim!=null&&bon!=null ? kim*12+bon : null;
+  const prev = li>0&&o.kimatte[li-1]!=null&&kim!=null ? (kim/o.kimatte[li-1]-1)*100 : null;
+  const rows = yrs.map((y,i)=>`<tr><td>${y}年</td><td class="num">${o.kimatte[i]!=null?fmtYen(o.kimatte[i]*1000):"―"}</td><td class="num">${o.bonus[i]!=null?fmtYen(o.bonus[i]*1000):"―"}</td><td class="num">${o.n[i]!=null?Math.round(o.n[i]/100)/10+"万人":"―"}</td></tr>`).join("");
+  $("#occArea").innerHTML = `<div class="result-head" style="margin-top:14px"><h2 style="font-size:26px">${esc(o.name)}</h2>
+    <div class="stats">
+      <div class="stat"><span class="k">月額給与 ${yrs[li]}年</span><span class="v">${kim!=null?fmtYen(kim*1000):"―"}</span></div>
+      <div class="stat"><span class="k">年間賞与</span><span class="v">${bon!=null?fmtYen(bon*1000):"―"}</span></div>
+      <div class="stat"><span class="k">年収目安（月額×12＋賞与）</span><span class="v">${annual!=null?fmtYen(annual*1000):"―"}</span></div>
+      <div class="stat"><span class="k">月額の前年比</span><span class="v ${prev==null?"":prev>=0?"up":"dn"}">${prev==null?"―":fmtPct(prev)}</span></div>
+    </div>
+    <div class="chart-box">${yearChartSVG({years: yrs, vals: o.kimatte.map(v=>v!=null?v*1000:null), label:"きまって支給する現金給与額（月額・円）"})}</div>
+    <div class="scrollx"><table><thead><tr><th>年</th><th class="num">月額給与（きまって支給）</th><th class="num">年間賞与</th><th class="num">労働者数</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="small">出典：厚生労働省「賃金構造基本統計調査」（${esc(ws.note)}）。月額給与は残業代込み・賞与含まず。</div></div>`;
+}
+
+// ===== 05c 公共工事設計労務単価 =====
+function initRomu(){
+  const r = LB.romu, sel = $("#romuSelect");
+  for (let i=0;i<r.occupations.length;i++){ const op=document.createElement("option"); op.value=i; op.textContent=r.occupations[i]; sel.appendChild(op); }
+  sel.addEventListener("change", e => { if (e.target.value!=="") renderRomu(+e.target.value); });
+  // 全国全職種平均の推移
+  const years = Object.keys(r.national_avg).map(Number).sort();
+  $("#romuTrend").innerHTML = `<b>全国・全職種平均の推移</b>（${years[0]}年→${years[years.length-1]}年で約${(r.national_avg[years[years.length-1]]/r.national_avg[years[0]]).toFixed(1)}倍。14年連続上昇）
+    <div class="chart-box">${yearChartSVG({years, vals: years.map(y=>r.national_avg[y]), label:"1日8時間あたり（円）"})}</div>
+    <div class="small">出典：国土交通省「公共工事設計労務単価」（${esc(r.label)}）。${esc(r.note)}。</div>`;
+}
+function renderRomu(oi){
+  const r = LB.romu;
+  const vals = r.prefs.map((p,pi)=>({pref:p, v:r.values[pi][oi]})).filter(x=>x.v!=null);
+  const avg = vals.length ? Math.round(vals.reduce((a,b)=>a+b.v,0)/vals.length) : null;
+  const hi = [...vals].sort((a,b)=>b.v-a.v)[0], lo = [...vals].sort((a,b)=>a.v-b.v)[0];
+  const rows = r.prefs.map((p,pi)=>{ const v=r.values[pi][oi]; return `<div class="romu-cell"><span>${esc(p)}</span><b>${v!=null?v.toLocaleString():"―"}</b></div>`; }).join("");
+  $("#romuArea").innerHTML = `<div class="result-head" style="margin-top:14px"><h2 style="font-size:26px">${esc(r.occupations[oi])}<span class="small" style="margin-left:14px">${esc(r.label)}・1日8時間あたり（円）</span></h2>
+    <div class="stats">
+      <div class="stat"><span class="k">全国単純平均</span><span class="v">${avg!=null?avg.toLocaleString()+"円":"―"}</span></div>
+      <div class="stat"><span class="k">最高 ${hi?esc(hi.pref):""}</span><span class="v">${hi?hi.v.toLocaleString()+"円":"―"}</span></div>
+      <div class="stat"><span class="k">最低 ${lo?esc(lo.pref):""}</span><span class="v">${lo?lo.v.toLocaleString()+"円":"―"}</span></div>
+    </div>
+    <div class="romu-grid">${rows}</div>
+    <div class="small">出典：国土交通省「公共工事設計労務単価」（${esc(r.label)}）。${esc(r.note)}。</div></div>`;
 }
 
 // ===== 03 調達品目からの検索 =====
