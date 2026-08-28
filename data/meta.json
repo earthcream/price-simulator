@@ -2,14 +2,15 @@
   "source": "日本銀行「時系列統計データ検索サイト」(https://www.stat-search.boj.or.jp/)",
   "latest_month": 202607,
   "first_month": 198001,
-  "n_series": 3028,
+  "n_series": 3285,
   "n_items_by_kind": {
     "domestic": 515,
     "domestic_tax": 515,
     "export_contract": 184,
     "export_yen": 184,
     "import_contract": 210,
-    "import_yen": 210
+    "import_yen": 210,
+    "service": 146
   },
   "fx_range": [
     198001,

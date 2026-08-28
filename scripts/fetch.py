@@ -7,6 +7,9 @@
                          国内(税込22/税抜12)・輸出(円24/契約通貨23)・輸入(円26/契約通貨25)
                          2020年1月〜最新月
   2. cgpilink2.csv     : 2020年基準接続指数（品目レベル）1980年1月〜2019年12月
+  2b. sppi_m_jp.zip / sppilink.csv : 企業向けサービス価格指数（2020年基準）と接続指数。
+                         物流運賃（道路貨物・外航/内航海運・航空貨物）、倉庫、労働者派遣等の
+                         サービス価格。1985年1月〜最新月
                          コード体系が2020年基準と共通なので、そのまま縦に接続できる
   3. cgpilink1.csv     : 同・類別レベル 1960年〜（参考・保存のみ）
   4. fm08_m_1.html     : 外国為替相場。FM08'FXERM07 = 東京市場ドル・円スポット
@@ -100,7 +103,7 @@ def main():
     s.headers["User-Agent"] = "kakaku-hakyuu-simulator (data update script)"
 
     print("[1/4] 日銀サイトからファイルを取得")
-    for fn in ["cgpi_m_jp.zip", "cgpilink1.csv", "cgpilink2.csv"]:
+    for fn in ["cgpi_m_jp.zip", "cgpilink1.csv", "cgpilink2.csv", "sppi_m_jp.zip", "sppilink.csv"]:
         download(s, BASE + fn, os.path.join(RAW, fn))
     download(s, FX_URL, os.path.join(RAW, "fm08_m_1.html"))
 
@@ -117,6 +120,21 @@ def main():
         return df.dropna(subset=["kind"])
 
     cur, link = keep(cur), keep(link)
+
+    # --- 企業向けサービス価格指数（SPPI）: 本系列（プレフィックス52）を追加 ---
+    with zipfile.ZipFile(os.path.join(RAW, "sppi_m_jp.zip")) as zf:
+        with zf.open("sppi_m_jp.csv") as f:
+            scur = load_boj_wide(io.TextIOWrapper(f, encoding="cp932"), encoding=None)
+    slink = load_boj_wide(os.path.join(RAW, "sppilink.csv"))
+
+    def keep_sppi(df):
+        df = df[df["code"].str.match(r"^PRCS20_52")].copy()
+        df["kind"] = "service"
+        return df
+
+    scur, slink = keep_sppi(scur), keep_sppi(slink)
+    cur = pd.concat([cur, scur], ignore_index=True)
+    link = pd.concat([link, slink], ignore_index=True)
 
     # 品目マスタ（現行系列基準。名前・階層は現行ファイルから取る）
     parsed = cur["name"].map(parse_name)

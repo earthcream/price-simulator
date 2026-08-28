@@ -64,6 +64,7 @@
   .small{font-size:16px;color:var(--ink-mute)}
   .chip{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.2em;padding:3px 9px;margin-right:9px;vertical-align:3px;white-space:nowrap;text-transform:uppercase}
   .chip.imp{background:var(--gold);color:var(--paper)}
+  .chip.svc{background:var(--down);color:var(--paper)}
   .chip.dom{background:var(--accent);color:var(--paper)}
   .chip.tier{background:var(--paper-deep);color:var(--ink-soft)}
   .chg-up{color:var(--up)} .chg-dn{color:var(--down)}
@@ -263,7 +264,7 @@
       <section id="sec-prices">
         <div class="section-label">Price Movements</div>
         <h2>品目の値動き検索：いま、何が上がって、何が下がっているか</h2>
-        <div class="deck">国内企業物価515品目と輸入物価210品目について、品目ごとの価格の推移と、直近の変化率ランキングを見られます。</div>
+        <div class="deck">国内企業物価515品目・輸入物価210品目に加え、トラック運賃・船便・航空貨物・倉庫・労働者派遣などのサービス価格146品目（企業向けサービス価格指数）も検索できます。</div>
         <div class="howto"><b>このページの見方</b>
           <ul><li>まず下の「品目を選ぶ」で、気になる品目（例：銅、ナフサ、段ボール）を選ぶか、名前の一部を入力してください。その品目の<b>価格の推移グラフ</b>と、1ヶ月前・3ヶ月前・12ヶ月前・5年前と比べた変化率が出ます。</li>
           <li>グラフの数字は「指数」です。<b>2020年の平均価格を100</b>として、いまいくつかを表します（150なら2020年より5割高い）。</li>
@@ -271,7 +272,7 @@
         <h3>品目を選んで推移を見る</h3>
         <div class="picker">
           <label>品目を選ぶ <select id="priceSelect"><option value="">― 分野から選ぶ ―</option></select></label>
-          <label>または検索 <span class="search-box"><input type="text" id="priceInput" placeholder="例：銅、ナフサ、段ボール" autocomplete="off"><div class="sugg" id="priceSugg"></div></span></label>
+          <label>または検索 <span class="search-box"><input type="text" id="priceInput" placeholder="例：銅、宅配便、外航貨物輸送" autocomplete="off"><div class="sugg" id="priceSugg"></div></span></label>
         </div>
         <div id="priceArea"></div>
         <h3>いま上がっている品目・下がっている品目（ランキング）</h3>
@@ -344,6 +345,7 @@ const H = 12;
 let DB=null, PX=null, itemArr=[], driverIndex=new Map(), nameOf=new Map(), pathOf=new Map(), kindOf=new Map();
 const CAT_ORDER = ["電気機器","電子部品・デバイス","情報通信機器","プラスチック製品","金属製品","鉄鋼","非鉄金属","化学製品","はん用機器","生産用機器","業務用機器","輸送用機器","窯業・土石製品","石油・石炭製品","パルプ・紙・同製品","木材・木製品","繊維製品","その他工業製品","電力・都市ガス・水道","鉱産物","スクラップ類","農林水産物","飲食料品"];
 const IMP_ORDER = ["電気・電子機器","金属・同製品","化学製品","石油・石炭・天然ガス","はん用・生産用・業務用機器","輸送用機器","その他産品・製品","木材・木製品・林産物","繊維品","飲食料品・食料用農水産物"];
+const SVC_ORDER = ["運輸・郵便","諸サービス","情報通信","リース・レンタル","広告","不動産","金融・保険"];
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -355,7 +357,7 @@ function monthLabel(yyyymm, add=0){ let y=Math.floor(yyyymm/100), m=yyyymm%100-1
 function dateLabel(iso){ const [y,m,d]=iso.split("-"); return `${y}年${+m}月${+d}日`; }
 function categoryOf(path){ const p=(path||"").split(">"); return p.length>1 ? p[1] : (p[0]||"その他"); }
 function catRank(cat, order){ const i=order.indexOf(cat); return i<0 ? 999 : i; }
-const chipOf = k => `<span class="chip ${k==='輸入'?'imp':'dom'}">${k}</span>`;
+const chipOf = k => `<span class="chip ${k==='輸入'?'imp':k==='サービス'?'svc':'dom'}">${k}</span>`;
 
 // ===== 初期化 =====
 Promise.all([fetch("data/results.json").then(r=>r.json()), fetch("data/prices.json").then(r=>r.json())]).then(([db, px]) => {
@@ -371,7 +373,7 @@ Promise.all([fetch("data/results.json").then(r=>r.json()), fetch("data/prices.js
   }
   for (const [c, e] of Object.entries(px.items)){ if (!nameOf.has(c)){ nameOf.set(c, e.n); pathOf.set(c, e.p); kindOf.set(c, e.k); } }
   const upd = db.meta.generated_at ? dateLabel(db.meta.generated_at) : monthLabel(db.meta.latest_month);
-  $("#metaLine").innerHTML = `<span>最新データ：<b>${monthLabel(db.meta.latest_month)}分</b></span><span>データ更新：<b>${upd}</b></span><span class="badge-live">Updated Monthly ／ 毎月更新</span><span>対象：国内515品目・輸入210品目</span>`;
+  $("#metaLine").innerHTML = `<span>最新データ：<b>${monthLabel(db.meta.latest_month)}分</b></span><span>データ更新：<b>${upd}</b></span><span class="badge-live">Updated Monthly ／ 毎月更新</span><span>対象：国内515・輸入210・サービス146品目</span>`;
   if (db.meta.generated_at) $("#mastDate").textContent = "Updated " + db.meta.generated_at.replace(/-/g,".");
   $("#loading").style.display = "none";
   $("#sec-alerts").classList.add("on");
@@ -449,7 +451,7 @@ function priceCardHTML(code, id, defaultN=36){
     <div class="picker"><span class="seg" data-code="${code}">${[[12,"1年"],[36,"3年"],[60,"5年"],[180,"15年"]].map(([n,l])=>`<button data-n="${n}" class="${n===defaultN?'on':''}">${l}</button>`).join("")}</span>
       <button class="print-btn" type="button" data-code="${code}">印刷／PDF（A4一枚）</button></div>
     <div class="chart-box"><div class="pchart">${priceChartSVG({months: PX.months, vals: v, nMonths: defaultN})}</div></div>
-    <div class="small">指数は2020年平均＝100。国内品目は消費税を除く接続指数、輸入品目は円ベース。</div></div>`;
+    <div class="small">指数は2020年平均＝100。国内品目は消費税を除く接続指数、輸入品目は円ベース、サービス品目は企業向けサービス価格指数（消費税込み）。</div></div>`;
 }
 function wirePriceCard(root){
   root.querySelectorAll(".seg[data-code] button").forEach(b => b.addEventListener("click", () => {
@@ -599,7 +601,11 @@ function showPrice(code){
 // ===== プルダウン＋検索 =====
 function buildSelect(sel, pool){
   const groups = new Map();
-  for (const it of pool){ const cat=categoryOf(it.path), key=it.kind==="輸入" ? "【輸入】"+cat : cat, rank=it.kind==="輸入" ? 1000+catRank(cat, IMP_ORDER) : catRank(cat, CAT_ORDER);
+  for (const it of pool){
+    let cat=categoryOf(it.path), key, rank;
+    if (it.kind==="サービス"){ cat=(it.path||"").split(">")[0]||"サービス"; key="【サービス】"+cat; rank=2000+catRank(cat, SVC_ORDER); }
+    else if (it.kind==="輸入"){ key="【輸入】"+cat; rank=1000+catRank(cat, IMP_ORDER); }
+    else { key=cat; rank=catRank(cat, CAT_ORDER); }
     if (!groups.has(key)) groups.set(key, {rank, items:[]}); groups.get(key).items.push(it); }
   for (const [g,{items}] of [...groups.entries()].sort((a,b)=>a[1].rank-b[1].rank)){ const og=document.createElement("optgroup"); og.label=g; for (const it of items){ const o=document.createElement("option"); o.value=it.code; o.textContent=it.name; og.appendChild(o); } sel.appendChild(og); }
 }
