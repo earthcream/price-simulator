@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>価格波及シミュレーター｜調達人材のための原材料価格影響把握</title>
+<title>価格波及シミュレーター｜調達人材の市況アシスタント</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&family=Shippori+Mincho:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -28,14 +28,14 @@
   .mast-top span:first-child{color:var(--accent);font-weight:700;font-family:var(--serif-jp);font-size:17px;letter-spacing:.1em}
   .title-row{display:flex;align-items:baseline;gap:22px;flex-wrap:wrap;margin-bottom:10px}
   h1{font-family:var(--serif-jp);font-size:44px;font-weight:800;letter-spacing:.01em;line-height:1.15;white-space:nowrap}
-  .subtitle{font-family:var(--serif-jp);font-size:19px;font-weight:600;letter-spacing:.14em;color:var(--ink-soft);white-space:nowrap}
+  .subtitle{font-family:var(--serif-jp);font-size:29px;font-weight:800;letter-spacing:.06em;color:var(--accent-deep);white-space:nowrap;background:linear-gradient(transparent 62%, rgba(45,95,63,.16) 62%);padding:0 6px}
   .tagline{font-size:18.5px;color:var(--ink-soft);max-width:900px;line-height:1.85;margin-bottom:16px}
   .meta-line{display:flex;gap:22px;flex-wrap:wrap;align-items:center;font-size:17px;color:var(--ink-soft)}
   .meta-line b{color:var(--ink);font-weight:700}
   .badge-live{font-family:var(--mono);font-size:11px;letter-spacing:.2em;background:var(--accent);color:var(--paper);padding:5px 14px;text-transform:uppercase}
   /* ===== 左ナビ＋本文 ===== */
   .layout{display:block}
-  aside{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:36px}
+  aside{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:36px}
   .nav-item{display:block;padding:14px 18px 12px;border:1.5px solid var(--ink);background:transparent;color:var(--ink);text-decoration:none;cursor:pointer;transition:all .2s;position:relative}
   .nav-item .no{font-family:var(--serif-en);font-style:italic;font-size:20px;color:var(--gold);display:block;line-height:1}
   .nav-item .nm{font-size:20px;font-weight:700;display:block;line-height:1.4;margin-top:2px;white-space:nowrap}
@@ -178,8 +178,26 @@
   .gate-box .err{color:var(--up);font-size:15px;margin-bottom:8px;display:none}
   footer.disclaimer{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:rgba(244,247,242,.85);font-size:15px;line-height:1.65;padding:12px 36px;z-index:50;border-top:3px double var(--paper-deep)}
   footer.disclaimer b{color:var(--paper)}
+  .disc-short{display:none} .disc-toggle{display:none}
+  @media(max-width:700px){
+    footer.disclaimer{font-size:12.5px;padding:8px 16px}
+    .disc-short{display:inline} .disc-full{display:none}
+    footer.disclaimer.open .disc-full{display:inline} footer.disclaimer.open .disc-short{display:none}
+    .disc-toggle{display:inline;background:none;border:none;color:var(--accent-bright);font-size:12.5px;text-decoration:underline;margin-left:8px;cursor:pointer}
+  }
   main{min-width:0}
-  @media(max-width:960px){ aside{grid-template-columns:repeat(2,1fr)} .guide dl{grid-template-columns:1fr} .nav-item .ds{display:none} .nav-item .nm{white-space:normal} .rank-grid{grid-template-columns:1fr} }
+  #menuBtn{display:none}
+  .menu-backdrop{display:none}
+  @media(max-width:960px){
+    .guide dl{grid-template-columns:1fr} .rank-grid{grid-template-columns:1fr}
+    #menuBtn{display:flex;align-items:center;gap:8px;position:fixed;top:12px;right:12px;z-index:98;background:var(--accent);color:#fff;border:none;padding:11px 18px;font-family:var(--serif-jp);font-size:16px;font-weight:700;box-shadow:0 4px 14px rgba(26,38,32,.3);cursor:pointer}
+    aside{position:fixed;top:0;right:0;bottom:0;width:290px;background:var(--paper);z-index:100;display:flex;flex-direction:column;gap:6px;padding:64px 18px 24px;margin:0;transform:translateX(105%);transition:transform .28s;overflow-y:auto;box-shadow:-10px 0 30px rgba(26,38,32,.3)}
+    body.menu-open aside{transform:none}
+    .menu-backdrop{position:fixed;inset:0;background:rgba(26,38,32,.5);z-index:99}
+    body.menu-open .menu-backdrop{display:block}
+    .nav-item{border:1px solid var(--rule);padding:10px 14px}
+    .nav-item .nm{white-space:normal;font-size:18px} .nav-item .ds{display:block;font-size:12.5px}
+  }
   @media(max-width:700px){ .container{padding:0 16px} body{font-size:17px} h1{font-size:30px;white-space:normal} .subtitle{white-space:normal} table{font-size:15.5px} th,td{padding:7px 6px}
     .search-box input[type=text]{width:100%} .gate-box{padding:28px 22px} .alert-head{grid-template-columns:1fr} .alert-head .bigchg{font-size:36px} }
 </style>
@@ -187,8 +205,8 @@
 <body>
 <div class="container">
   <header class="masthead">
-    <div class="mast-top"><span><a href="https://www.future-procurement.com/" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">未来調達研究所</a></span><span id="mastDate">Price Pass-through Simulator</span></div>
-    <div class="title-row"><h1>価格波及シミュレーター</h1><span class="subtitle">調達人材のための原材料価格影響把握</span></div>
+    <div class="mast-top"><a href="https://www.future-procurement.com/" target="_blank" rel="noopener"><img src="https://www.future-procurement.com/logo.png" alt="未来調達研究所株式会社" style="height:54px;width:auto"></a></div>
+    <div class="title-row"><h1>価格波及シミュレーター</h1><span class="subtitle">調達人材の市況アシスタント</span></div>
     <p class="tagline">いま上がっている原材料はどれか。その動きが自社の調達品に「いつ・どれだけ」及ぶのか。日本銀行の企業物価指数40年分から目安を示します。社内説明や価格交渉の準備にお役立てください。各グラフは「印刷／PDF」でA4一枚に出力できます。</p>
     <div class="meta-line" id="metaLine">データ読み込み中…</div>
   </header>
@@ -196,12 +214,11 @@
   <div class="layout">
     <aside id="nav">
       <a class="nav-item" data-sec="howto"><span class="no">00</span><span class="nm">このサイトの使い方</span><span class="ds">はじめての方はこちら。何ができるか、どう使うか</span></a>
-      <a class="nav-item on" data-sec="alerts"><span class="no">01</span><span class="nm">注目品目</span><span class="ds">最近大きく動いた原材料と、これから影響が出る調達品</span></a>
-      <a class="nav-item" data-sec="prices"><span class="no">02</span><span class="nm">品目の値動き検索</span><span class="ds">いま上がっている・下がっている品目と、全品目の推移</span></a>
-      <a class="nav-item" data-sec="search"><span class="no">03</span><span class="nm">調達品目からの検索<span class="rec">オススメ</span></span><span class="ds">この調達品は、何が上がると、いつ・どれだけ上がるか</span></a>
-      <a class="nav-item" data-sec="sim"><span class="no">04</span><span class="nm">シミュレーター</span><span class="ds">この品目が上がったら、何の調達品が・いつ・どれだけ上がるか</span></a>
-      <a class="nav-item" data-sec="wages"><span class="no">05</span><span class="nm">労務費・賃金</span><span class="ds">日本の賃金はいま、月いくらか。毎月更新</span></a>
-      <a class="nav-item" data-sec="jetro"><span class="no">06</span><span class="nm">海外の賃金</span><span class="ds">世界111都市のワーカー賃金（月額・米ドル）</span></a>
+      <a class="nav-item" data-sec="alerts"><span class="no">01</span><span class="nm">注目品目</span><span class="ds">最近大きく動いた原材料と、これから影響が出る調達品</span></a>
+      <a class="nav-item on" data-sec="prices"><span class="no">02</span><span class="nm">品目の値動き検索</span><span class="ds">いま上がっている・下がっている品目と、全品目の推移</span></a>
+      <a class="nav-item" data-sec="search"><span class="no">03</span><span class="nm">調達品目から調べる<span class="rec">オススメ</span></span><span class="ds">買っている品目を選ぶ→「何が原因で・いつ・どれだけ上がるか」</span></a>
+      <a class="nav-item" data-sec="sim"><span class="no">04</span><span class="nm">原材料から調べる</span><span class="ds">原材料を選ぶ→「どの調達品が・いつ・どれだけ上がるか」を試算</span></a>
+      <a class="nav-item" data-sec="wages"><span class="no">05</span><span class="nm">労務費・賃金（国内・海外）</span><span class="ds">日本の賃金・職種別単価と、世界111都市のワーカー賃金</span></a>
     </aside>
 
     <main>
@@ -223,11 +240,11 @@
         <div class="case"><div class="q">最近、何が値上がりしているのか知りたい</div>
           <div class="a">→ <span class="tab-link" data-go="alerts">01 注目品目</span>を開いてください。ここ3ヶ月で珍しい動きをした原材料が、最初から並んでいます。もっと広く見たいときは<span class="tab-link" data-go="prices">02 品目の値動き検索</span>の「ランキング」で、上がった順・下がった順に見られます。</div></div>
         <div class="case"><div class="q">自分が買っている部品や材料が、これから上がりそうか知りたい</div>
-          <div class="a">→ <span class="tab-link" data-go="search">03 調達品目からの検索</span>で、自分の買っている品目を選んでください。<b>その品目の値段を動かしてきた原材料</b>と、「原材料が10%上がったら、何ヶ月後に何%上がるか」が出ます。あわせて<span class="tab-link" data-go="prices">02</span>で、その原材料が今どう動いているかを確認すると、先が読めます。</div></div>
+          <div class="a">→ <span class="tab-link" data-go="search">03 調達品目から調べる</span>で、自分の買っている品目を選んでください。<b>その品目の値段を動かしてきた原材料</b>と、「原材料が10%上がったら、何ヶ月後に何%上がるか」が出ます。あわせて<span class="tab-link" data-go="prices">02</span>で、その原材料が今どう動いているかを確認すると、先が読めます。</div></div>
         <div class="case"><div class="q">サプライヤーから「原材料が上がったので値上げしたい」と言われた。妥当か知りたい</div>
-          <div class="a">→ <span class="tab-link" data-go="search">03 調達品目からの検索</span>で、その品目を選び、「原材料が ◯% 上がったとき」に先方の言う上昇率を入れてください。<b>過去の平均ではどれくらい転嫁されてきたか</b>（予想幅つき）が出るので、先方の要求と比べる材料になります。ただし業界平均ですので、個別の契約とは違うことがあります。</div></div>
+          <div class="a">→ <span class="tab-link" data-go="search">03 調達品目から調べる</span>で、その品目を選び、「原材料が ◯% 上がったとき」に先方の言う上昇率を入れてください。<b>過去の平均ではどれくらい転嫁されてきたか</b>（予想幅つき）が出るので、先方の要求と比べる材料になります。ただし業界平均ですので、個別の契約とは違うことがあります。</div></div>
         <div class="case"><div class="q">「鋼材が10%上がったら、うちの調達品はどうなる？」を社内に説明したい</div>
-          <div class="a">→ <span class="tab-link" data-go="sim">04 シミュレーター</span>で「熱延広幅帯鋼」などを選び、10%と入れてください。影響を受ける調達品が大きい順に並びます。各行の「グラフ」→「印刷／PDF」で<b>A4一枚の資料</b>になります（出典と注意書きも自動で入ります）。</div></div>
+          <div class="a">→ <span class="tab-link" data-go="sim">04 原材料から調べる（シミュレーター）</span>で「熱延広幅帯鋼」などを選び、10%と入れてください。影響を受ける調達品が大きい順に並びます。各行の「グラフ」→「印刷／PDF」で<b>A4一枚の資料</b>になります（出典と注意書きも自動で入ります）。</div></div>
         <div class="case"><div class="q">労務費・人件費の相場観を知りたい</div>
           <div class="a">→ <span class="tab-link" data-go="wages">05 労務費・賃金</span>で、日本の1人あたり月間給与（現金給与総額）の推移が見られます。サプライヤーから「人件費が上がっている」と言われたとき、実際にどれくらい上がっているかを確認する材料になります。</div></div>
         <div class="case"><div class="q">ある品目の値段が、ここ数年どう動いてきたか見たい</div>
@@ -295,11 +312,11 @@
         <div class="rank-grid"><div><h4>上昇トップ15</h4><table id="rankUp"></table></div><div><h4>下落トップ15</h4><table id="rankDn"></table></div></div>
       </section>
 
-      <!-- 03 調達品目からの検索 -->
+      <!-- 03 調達品目から調べる -->
       <section id="sec-search">
         <div class="section-label">Search by Procurement Item</div>
-        <h2>調達品目からの検索：この調達品は、何が上がると、いつ・どれだけ上がるか</h2>
-        <div class="deck">調達品を選ぶと、その価格を動かしてきた原材料・上流品目と、「上流が◯%上がったら、この調達品は◯ヶ月後に◯%上がる」を表示します。</div>
+        <h2>調達品目から調べる：この調達品は、何が「原因」で・いつ・どれだけ上がるか</h2>
+        <div class="deck"><b>結果（買っている品目）から、原因（原材料）をたどるページ</b>です。調達品を選ぶと、その価格を動かしてきた原材料と「上流が◯%上がったら◯ヶ月後に◯%上がる」が出ます。逆に、原材料側から影響先を調べたいときは「04 原材料から調べる」へ。</div>
         <div class="howto"><b>このページの見方</b>
           <ul><li>「調達品を選ぶ」で、<b>自分が買っている品目</b>（例：ワイヤーハーネス、段ボール、ボルト・ナット）を選んでください。</li>
           <li>その調達品の価格を<b>過去に実際に動かしてきた原材料</b>が一覧で出ます。統計的にはっきり関係が確認できたものだけを載せています。</li>
@@ -316,8 +333,8 @@
       <!-- 04 シミュレーター -->
       <section id="sec-sim">
         <div class="section-label">Simulator</div>
-        <h2>シミュレーター：この品目が上がったら、何の調達品が・いつ・どれだけ上がるか</h2>
-        <div class="deck">原材料・上流品目と価格の変化率を入力すると、影響を受ける調達品・時期・変化幅を表示します。直接の影響に加え、その先への連鎖（例：原油→ナフサ→エチレン→ポリエチレン）も経路つきで示します。</div>
+        <h2>原材料から調べる（シミュレーター）：この原材料が上がったら、どの調達品が・いつ・どれだけ上がるか</h2>
+        <div class="deck"><b>原因（原材料）から、結果（影響を受ける調達品）をたどるページ</b>です。03とは向きが逆。原材料と上昇率を入力すると、影響を受ける調達品・時期・変化幅が一覧になります。連鎖（例：原油→ナフサ→エチレン→ポリエチレン）も経路つき。</div>
         <div class="howto"><b>このページの見方</b>
           <ul><li>「上流品目を選ぶ」で<b>値上がりした（しそうな）原材料</b>を選び、「価格変化率」に何%上がるかを入れてください（下がる場合はマイナス）。</li>
           <li><b>影響を受ける調達品</b>が、影響の大きい順に並びます。「直接」は統計ではっきり確認できた関係、「2段階先・3段階先」は「原油→ナフサ→ポリエチレン」のように間に品目をはさんで伝わる影響の目安です。</li>
@@ -366,7 +383,7 @@
       </section>
 
       <!-- 06 海外の賃金 -->
-      <section id="sec-jetro">
+      <section id="sec-jetro" style="margin-top:70px;padding-top:36px;border-top:3px double var(--ink)">
         <div class="section-label">Global Wages</div>
         <h2>海外の賃金：世界の工場のワーカーは、月いくらか</h2>
         <div class="deck">ジェトロ「投資関連コスト比較調査」による、世界111都市の製造業ワーカー（一般工職）の月額賃金（米ドル）です。海外調達先・生産移管先の労務費比較にお使いください。日本の都市も入っているので比較できます。</div>
@@ -385,10 +402,12 @@
   </div>
 </div>
 
+<button id="menuBtn" type="button">☰ メニュー</button>
+<div class="menu-backdrop" id="menuBk"></div>
 <div class="gate" id="gate">
   <div class="gate-box">
     <div class="section-label">Registration</div>
-    <h2 id="gateTitle">この機能のご利用にはメールアドレスの登録が必要です</h2>
+    <h2 id="gateTitle">労務費・賃金データのご利用にはメールアドレスの登録が必要です</h2>
     <p>ご登録は初回の1回のみです。</p>
     <div class="err" id="gateErr">メールアドレスの形式をご確認ください。</div>
     <input type="email" id="gateEmail" placeholder="your@company.co.jp" autocomplete="email">
@@ -398,9 +417,10 @@
   </div>
 </div>
 
-<footer class="disclaimer"><div class="container">
-  <b>ご利用上の注意：</b>本サイトの数値は、日本銀行の企業物価指数をもとに、品目ごとの業界平均における過去の値上がり・値下がりの波及パターンから推定した目安であり、個別の取引価格を示すものではありません。
-  出典：日本銀行「時系列統計データ検索サイト」（企業物価指数・2020年基準／接続指数、外国為替相場）を未来調達研究所株式会社が加工して作成。
+<footer class="disclaimer" id="disc"><div class="container">
+  <span class="disc-short">※数値は公的統計から推定した「目安」です（個別の取引価格ではありません）<button class="disc-toggle" id="discToggle" type="button">出典を見る ▲</button></span>
+  <span class="disc-full"><b>ご利用上の注意：</b>本サイトの数値は、公的統計をもとに、品目ごとの業界平均における過去の値上がり・値下がりのパターンから推定・整理した目安であり、個別の取引価格を示すものではありません。
+  出典：日本銀行「時系列統計データ検索サイト」（企業物価指数・企業向けサービス価格指数・外国為替相場）、厚生労働省「毎月勤労統計調査」「賃金構造基本統計調査」、国土交通省「公共工事設計労務単価」、ジェトロ「投資関連コスト比較調査」を未来調達研究所株式会社が加工して作成。</span>
 </div></footer>
 
 <script>
@@ -440,9 +460,8 @@ Promise.all([fetch("data/results.json").then(r=>r.json()), fetch("data/prices.js
   for (const [c, e] of Object.entries(px.items)){ if (!nameOf.has(c)){ nameOf.set(c, e.n); pathOf.set(c, e.p); kindOf.set(c, e.k); } }
   const upd = db.meta.generated_at ? dateLabel(db.meta.generated_at) : monthLabel(db.meta.latest_month);
   $("#metaLine").innerHTML = `<span>最新データ：<b>${monthLabel(db.meta.latest_month)}分</b></span><span>データ更新：<b>${upd}</b></span><span class="badge-live">Updated Monthly ／ 毎月更新</span><span>対象：国内515・輸入210・サービス146品目</span>`;
-  if (db.meta.generated_at) $("#mastDate").textContent = "Updated " + db.meta.generated_at.replace(/-/g,".");
   $("#loading").style.display = "none";
-  $("#sec-alerts").classList.add("on");
+  showSec("prices");
   renderAlerts(); renderRanking(3); initPickers(); initWages(); initOcc(); initRomu(); initJetro();
 }).catch(err => { $("#loading").textContent = "データの読み込みに失敗しました: " + err; });
 
@@ -456,14 +475,18 @@ function lockBox(feature){
 }
 function showSec(name){
   document.querySelectorAll(".nav-item").forEach(x => x.classList.toggle("on", x.dataset.sec===name));
-  document.querySelectorAll("main section").forEach(s => s.classList.toggle("on", s.id === "sec-" + name));
+  document.querySelectorAll("main section").forEach(s => s.classList.toggle("on", s.id === "sec-" + name || (name === "wages" && s.id === "sec-jetro")));
   window.scrollTo({top: 0, behavior: "smooth"});
 }
 document.querySelectorAll(".nav-item").forEach(b => b.addEventListener("click", () => {
-  if ((b.dataset.sec === "sim" || b.dataset.sec === "jetro") && !hasEmail()){ openGate(b.dataset.sec); return; }
+  if (b.dataset.sec === "wages" && !hasEmail()){ openGate(b.dataset.sec); return; }
   showSec(b.dataset.sec);
 }));
 $("#gateCancel").addEventListener("click", () => $("#gate").classList.remove("on"));
+$("#menuBtn").addEventListener("click", () => document.body.classList.toggle("menu-open"));
+$("#menuBk").addEventListener("click", () => document.body.classList.remove("menu-open"));
+document.querySelectorAll(".nav-item").forEach(b => b.addEventListener("click", () => document.body.classList.remove("menu-open")));
+$("#discToggle").addEventListener("click", () => { $("#disc").classList.add("open"); });
 document.querySelectorAll(".tab-link").forEach(a => a.addEventListener("click", () => document.querySelector(`.nav-item[data-sec="${a.dataset.go}"]`).click()));
 $("#gateSubmit").addEventListener("click", submitEmail);
 $("#gateEmail").addEventListener("keydown", e => { if (e.key==="Enter") submitEmail(); });
@@ -563,7 +586,7 @@ function openPrint(p){
   <h1>${esc(p.title)}</h1><div class="lead">${esc(p.lead)}</div>
   <div class="kv">${p.kv.map(([k,v])=>`<span>${esc(k)}：<b>${esc(v)}</b></span>`).join("")}</div>
   ${p.svg}<div class="two">${p.tables.join("")}</div>
-  <div class="note"><b>ご利用上の注意：</b>本資料の数値は、日本銀行の企業物価指数をもとに、品目ごとの業界平均における過去の値上がり・値下がりの波及パターンから推定した目安であり、個別の取引価格を示すものではありません。出典：日本銀行「時系列統計データ検索サイト」（企業物価指数・2020年基準／接続指数、外国為替相場）を未来調達研究所株式会社が加工して作成。${esc(SITE_NAME)} ／ データ：${esc(monthLabel(DB.meta.latest_month))}分まで</div></body></html>`;
+  <div class="note"><b>ご利用上の注意：</b>本資料の数値は、公的統計をもとに、品目ごとの業界平均における過去の値上がり・値下がりのパターンから推定・整理した目安であり、個別の取引価格を示すものではありません。出典：日本銀行「時系列統計データ検索サイト」（企業物価指数・2020年基準／接続指数、外国為替相場）を未来調達研究所株式会社が加工して作成。${esc(SITE_NAME)} ／ データ：${esc(monthLabel(DB.meta.latest_month))}分まで</div></body></html>`;
   const w = window.open("", "_blank");
   if (!w){ alert("ポップアップがブロックされました。ブラウザの設定で許可してください。"); return; }
   w.document.open(); w.document.write(html); w.document.close();
@@ -598,6 +621,39 @@ function chartTitle(src, rate, dst, withBand, route){
   const sub = (withBand ? "緑の帯は「95%の確率でこの範囲に収まる」という予想幅。" : "") + (route ? `経路：${route}（各段階の推定をつなげた目安）` : "");
   return `${lead}<span class="lead">${sub}</span>`;
 }
+// 2系列の対比チャート（どちらも2020年=100の指数）
+function compareChartSVG(codeA, codeB, nMonths=60){
+  const A = PX.items[codeA], B = PX.items[codeB];
+  if (!A || !B) return "";
+  const months = PX.months, W=720, Hh=300, m={t:28,r:22,b:42,l:62};
+  const iw=W-m.l-m.r, ih=Hh-m.t-m.b;
+  const la = lastIdx(A.v), lb = lastIdx(B.v), li = Math.max(la, lb);
+  const from = Math.max(0, li - nMonths + 1);
+  const pts = key => { const v = key==="A"?A.v:B.v; const o=[]; for(let i=from;i<=li;i++) if (v[i]!=null) o.push([i, v[i]]); return o; };
+  const pa = pts("A"), pb = pts("B");
+  if (pa.length<2 || pb.length<2) return "";
+  const ys = [...pa.map(x=>x[1]), ...pb.map(x=>x[1])];
+  let ymin=Math.min(...ys), ymax=Math.max(...ys); const pad=(ymax-ymin)*0.12||1; ymin-=pad; ymax+=pad;
+  const X=i=>m.l+iw*(i-from)/Math.max(1,li-from), Y=v=>m.t+ih*(1-(v-ymin)/(ymax-ymin));
+  const step=niceStep((ymax-ymin)/5); let ticks=[]; for(let v=Math.ceil(ymin/step)*step; v<=ymax; v+=step) ticks.push(+v.toFixed(6));
+  const grid=ticks.map(v=>`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="#dde6d6"/><text x="${m.l-8}" y="${Y(v)+5}" text-anchor="end" font-size="13" fill="#6f7d73">${v.toFixed(step<1?1:0)}</text>`).join("");
+  let xt=""; for (let i=from;i<=li;i++){ const mm=months[i]%100; if (mm===1 && (li-from<=72 || Math.floor(months[i]/100)%2===0)) xt+=`<text x="${X(i)}" y="${Hh-16}" text-anchor="middle" font-size="13" fill="#6f7d73">${Math.floor(months[i]/100)}年</text>`; }
+  const line = (pts, color) => `<path d="M${pts.map(([i,v])=>`${X(i)},${Y(v)}`).join(" L")}" fill="none" stroke="${color}" stroke-width="2.4"/>` +
+    pts.map(([i,v])=>`<circle cx="${X(i)}" cy="${Y(v)}" r="9" fill="transparent"><title>${monthLabel(months[i])}: ${v}</title></circle>`).join("");
+  const CA="#2d5f3f", CB="#9c3b2e";
+  const ea=pa[pa.length-1], eb=pb[pb.length-1];
+  let ya=Y(ea[1])-10, yb=Y(eb[1])-10;
+  if (Math.abs(ya-yb)<20){ if (ya<yb) yb=ya+22; else ya=yb+22; }
+  const lab = (e, y, color, name) => `<text x="${X(e[0])}" y="${y}" text-anchor="end" font-size="14" font-weight="700" fill="${color}">${esc(name)} ${e[1]}</text>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${Hh}" width="100%" style="max-width:${W}px">${grid}
+    ${line(pa, CA)}${line(pb, CB)}${lab(ea, ya, CA, A.n)}${lab(eb, yb, CB, B.n)}${xt}
+    <text transform="rotate(-90 16 ${(m.t+Hh-m.b)/2})" x="16" y="${(m.t+Hh-m.b)/2}" text-anchor="middle" font-size="13" fill="#3a4a40">指数（2020年＝100）</text></svg>`;
+}
+function compareBlock(codeA, codeB){
+  const svg = compareChartSVG(codeA, codeB);
+  if (!svg) return "";
+  return `<div class="chart-title" style="margin-top:22px">参考：<b style="color:#2d5f3f">${esc(nameOf.get(codeA))}（緑）</b>と<b style="color:#9c3b2e">${esc(nameOf.get(codeB))}（えんじ）</b>の実際の価格の動き（過去5年、2020年平均＝100）。上のグラフが「理論上の波及」、こちらが「実際の値動き」です。</div><div class="chart-box">${svg}</div>`;
+}
 function attachRowCharts(tableEl, makeChart){
   tableEl.querySelectorAll("tr.row-click").forEach(tr => tr.addEventListener("click", () => {
     const open = tr.classList.contains("sel");
@@ -605,9 +661,9 @@ function attachRowCharts(tableEl, makeChart){
     tableEl.querySelectorAll("tr.row-click").forEach(x => x.classList.remove("sel"));
     if (open) return;
     tr.classList.add("sel");
-    const {title, svg, print} = makeChart(tr.dataset);
+    const {title, svg, print, extra} = makeChart(tr.dataset);
     const row = document.createElement("tr"); row.className = "chart-row";
-    row.innerHTML = `<td colspan="${tr.children.length}"><div class="chart-head"><div class="chart-title">${title}</div><button class="print-btn" type="button">印刷／PDF（A4一枚）</button></div><div class="chart-box">${svg}</div></td>`;
+    row.innerHTML = `<td colspan="${tr.children.length}"><div class="chart-head"><div class="chart-title">${title}</div><button class="print-btn" type="button">印刷／PDF（A4一枚）</button></div><div class="chart-box">${svg}</div>${extra||""}</td>`;
     row.querySelector(".print-btn").addEventListener("click", ev => { ev.stopPropagation(); printImpact({...print, svg}); });
     tr.after(row); row.scrollIntoView({behavior:"smooth", block:"nearest"});
   }));
@@ -740,7 +796,6 @@ function initWages(){
   renderWages();
 }
 function renderWages(){
-  if (!hasEmail()){ $("#wageArea").innerHTML = lockBox("毎月の賃金データ"); return; }
   const sr = WG.series[wageKey], vals = wageVals(), months = WG.months;
   const yen = sr.unit === "円";
   const li = lastIdx(sr.vals);
@@ -823,7 +878,6 @@ function renderOcc(code){
 // ===== 05c 公共工事設計労務単価 =====
 function initRomu(){
   const r = LB.romu, sel = $("#romuSelect");
-  if (!hasEmail()){ $("#romuArea").innerHTML = lockBox("公共工事設計労務単価"); $("#romuTrend").innerHTML = ""; sel.parentElement.style.display = "none"; return; }
   sel.parentElement.style.display = "";
   sel.innerHTML = '<option value="">― 職種を選ぶ ―</option>';
   $("#romuArea").innerHTML = "";
@@ -913,7 +967,7 @@ function renderJetro(){
   }));
 }
 
-// ===== 03 調達品目からの検索 =====
+// ===== 03 調達品目から調べる =====
 let detailItem = null;
 function renderDetail(it){
   detailItem = it; const area = $("#detailArea");
@@ -944,7 +998,7 @@ function drawDetailTable(){
       <td class="num"><button class="graph-btn" type="button">グラフ</button></td></tr>`).join("");
   $("#detailTable").innerHTML = `<table id="detailTbl"><thead><tr><th>原材料・上流品目（${fmtPct(r,0)}上がったら）</th><th class="num">影響が最大になる時期</th><th class="num">そのときの変化幅（予想幅）</th><th class="num">12ヶ月後（予想幅）</th><th class="num">上がるとき／下がるとき</th><th class="num">根拠データ</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
   attachRowCharts($("#detailTbl"), ds => { const d=it.drivers[+ds.i], vals=d.elast.map(v=>v*r), lo=d.ci_lo.map(v=>v*r), hi=d.ci_hi.map(v=>v*r);
-    return { title: chartTitle(d.name, r, it.name, true), svg: impactChartSVG({vals, lo, hi, peak_h: d.peak_h}), print: {src:d.name, rate:r, dst:it.name, vals, lo, hi, peak_h:d.peak_h, sample: sampleStr(d)} }; });
+    return { title: chartTitle(d.name, r, it.name, true), svg: impactChartSVG({vals, lo, hi, peak_h: d.peak_h}), print: {src:d.name, rate:r, dst:it.name, vals, lo, hi, peak_h:d.peak_h, sample: sampleStr(d)}, extra: compareBlock(d.code, it.code) }; });
 }
 
 // ===== 04 シミュレーター =====
@@ -988,7 +1042,7 @@ function renderSim(){
     <div class="scrollx" style="margin-top:12px"><table id="simTbl"><thead><tr><th>影響を受ける調達品</th><th class="num">影響が最大になる時期</th><th class="num">そのときの変化幅（予想幅）</th><th class="num">12ヶ月後</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
     <div class="legend"><b>直接</b>＝統計的にはっきり確認できた直接の影響。<b>2段階先・3段階先</b>＝直接の影響を経路に沿ってつなげた目安で、予想幅は出しません（同じ調達品に複数の経路がある場合は、最も短く影響の大きい経路を採用）。<b>予想幅</b>＝95%の確率でこの範囲に収まる見込み。</div></div>`;
   attachRowCharts($("#simTbl"), ds => { const x=results[+ds.i], vals=x.elast.map(v=>v*r), lo=x.ci_lo?x.ci_lo.map(v=>v*r):null, hi=x.ci_hi?x.ci_hi.map(v=>v*r):null, route=x.tier>1?routeOf(x):"";
-    return { title: chartTitle(it.name, r, nameOf.get(x.code), x.tier===1, esc(route)), svg: impactChartSVG({vals, lo, hi, peak_h: x.peak_h}), print: {src:it.name, rate:r, dst:nameOf.get(x.code), vals, lo, hi, peak_h:x.peak_h, route, sample: x.drv?sampleStr(x.drv):""} }; });
+    return { title: chartTitle(it.name, r, nameOf.get(x.code), x.tier===1, esc(route)), svg: impactChartSVG({vals, lo, hi, peak_h: x.peak_h}), print: {src:it.name, rate:r, dst:nameOf.get(x.code), vals, lo, hi, peak_h:x.peak_h, route, sample: x.drv?sampleStr(x.drv):""}, extra: compareBlock(it.code, x.code) }; });
 }
 </script>
 </body>
