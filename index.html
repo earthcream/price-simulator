@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>相場わかるくん｜調達の相場は、ここだけでいい。（未来調達研究所）</title>
+<title>値上げ妥当性シミュレーター｜調達人材の相場確認サイト（未来調達研究所）</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&family=Shippori+Mincho:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -207,7 +207,7 @@
 <div class="container">
   <header class="masthead">
     <div class="mast-top"><a href="https://www.future-procurement.com/" target="_blank" rel="noopener"><img src="https://www.future-procurement.com/logo.png" alt="未来調達研究所株式会社" style="height:54px;width:auto"></a><span class="mast-copy">調達人材が必要な市況データ、すべて集めました</span></div>
-    <div class="title-row"><h1>相場わかるくん</h1><span class="subtitle">調達の相場は、ここだけでいい。</span></div>
+    <div class="title-row"><h1>値上げ妥当性シミュレーター</h1><span class="subtitle">調達人材の相場確認サイト</span></div>
     <p class="tagline">いま上がっている原材料はどれか。その動きが自社の調達品に「いつ・どれだけ」及ぶのか。日本銀行・厚生労働省・国土交通省・ジェトロの公的統計から目安を示します。社内説明や価格交渉の準備にお役立てください。各グラフは「印刷／PDF」でA4一枚に出力できます。</p>
     <div class="meta-line" id="metaLine">データ読み込み中…</div>
   </header>
@@ -434,7 +434,7 @@
 <script>
 "use strict";
 const EMAIL_ENDPOINT = "https://script.google.com/macros/s/AKfycbz9blFjmjbRx8Lc2rTMxumUW9_CeIydv25PcGhVNENKoODo4XTcZfblmm36BkACOd8F/exec";   // Google Apps Script のウェブアプリURL（docs/メール登録の設定手順.md）
-const SITE_NAME = "相場わかるくん（未来調達研究所）";
+const SITE_NAME = "値上げ妥当性シミュレーター（未来調達研究所）";
 const H = 12;
 let DB=null, PX=null, WG=null, LB=null, JT=null, JH=null, WK=null, itemArr=[], driverIndex=new Map(), nameOf=new Map(), pathOf=new Map(), kindOf=new Map();
 const CAT_ORDER = ["電気機器","電子部品・デバイス","情報通信機器","プラスチック製品","金属製品","鉄鋼","非鉄金属","化学製品","はん用機器","生産用機器","業務用機器","輸送用機器","窯業・土石製品","石油・石炭製品","パルプ・紙・同製品","木材・木製品","繊維製品","その他工業製品","電力・都市ガス・水道","鉱産物","スクラップ類","農林水産物","飲食料品"];
@@ -579,7 +579,7 @@ function wirePriceCard(root){
 
 // ===== 印刷（A4一枚） =====
 function openPrint(p){
-  const html = `<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>${esc(p.title)}｜相場わかるくん</title>
+  const html = `<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>${esc(p.title)}｜値上げ妥当性シミュレーター</title>
   <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&display=swap" rel="stylesheet">
   <style>@page{size:A4;margin:16mm 14mm} body{font-family:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;color:#1a2620;font-size:12.5px;line-height:1.6;margin:0}
   .top{display:flex;justify-content:space-between;font-family:Consolas,monospace;font-size:10px;letter-spacing:.15em;color:#3a4a40;border-bottom:1px solid #c5d2bd;padding-bottom:6px;margin-bottom:12px}
@@ -590,7 +590,7 @@ function openPrint(p){
   .note{font-size:10.5px;color:#3a4a40;border-top:3px double #1a2620;margin-top:12px;padding-top:8px;line-height:1.55}
   .btn{position:fixed;top:10px;right:10px;padding:8px 16px;background:#2d5f3f;color:#fff;border:none;font-size:14px;cursor:pointer} @media print{.btn{display:none}}</style></head><body>
   <button class="btn" onclick="window.print()">印刷／PDF保存</button>
-  <div class="top"><span>FUTURE PROCUREMENT RESEARCH INSTITUTE</span><span>相場わかるくん ／ ${esc(DB.meta.generated_at ? dateLabel(DB.meta.generated_at) : "")}</span></div>
+  <div class="top"><span>FUTURE PROCUREMENT RESEARCH INSTITUTE</span><span>値上げ妥当性シミュレーター ／ ${esc(DB.meta.generated_at ? dateLabel(DB.meta.generated_at) : "")}</span></div>
   <h1>${esc(p.title)}</h1><div class="lead">${esc(p.lead)}</div>
   <div class="kv">${p.kv.map(([k,v])=>`<span>${esc(k)}：<b>${esc(v)}</b></span>`).join("")}</div>
   ${p.svg}<div class="two">${p.tables.join("")}</div>
