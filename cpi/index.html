@@ -33,10 +33,13 @@
   .picker label{display:block;font-weight:600;margin-bottom:6px}
   .picker-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
   .picker-row > div{flex:1 1 260px}
-  .overview tr{cursor:pointer} .overview tr:hover td{background:var(--paper-warm)} .overview td.name{font-weight:600}
+  .overview tr{cursor:pointer} .overview tr:hover td{background:var(--paper-warm)} .overview td.name{font-weight:600;text-align:left}
   .btn{font:inherit;font-size:17px;padding:9px 18px;background:var(--accent);color:#fff;border:none;border-radius:4px;cursor:pointer} .btn:hover{background:var(--accent-deep)}
   .item-block{border-top:3px double var(--rule);margin-top:30px;padding-top:6px;break-inside:avoid;page-break-inside:avoid}
   @media print{ .btn{display:none} .item-block{break-before:page;page-break-before:always;border-top:none} }
+  .tri{display:grid;grid-template-columns:1fr;gap:10px}
+  h3{font-size:20px;margin:18px 0 6px;font-weight:700}
+  .tri th,.tri td{padding:6px 10px}
   .tag{display:inline-block;padding:1px 8px;border-radius:3px;font-size:14.5px;background:var(--paper-deep)}
   select,input[type=text]{width:100%;font:inherit;font-size:18px;padding:9px 12px;border:1px solid var(--rule);background:#fff;color:var(--ink);border-radius:4px}
   .hint{color:var(--ink-mute);font-size:14.5px;margin:6px 0 0}
@@ -84,6 +87,7 @@
     <p class="hint" id="hint"></p>
   </div>
 
+  <div id="monthly"></div>
   <div id="overview"></div>
   <div id="main"></div>
 
@@ -109,7 +113,7 @@ fetch("data.json?v="+Date.now()).then(r=>r.json()).then(d=>{
   const h=decodeURIComponent(location.hash.slice(1));
   const first=byCode.has(h)?h:(d.items.find(i=>i.leaf)||d.items[0]).code;
   const params=new URLSearchParams(location.search); if(params.get("store")&&[...ss.options].some(o=>o.value===params.get("store"))) ss.value=params.get("store");
-  buildSelect(""); renderOverview();
+  buildSelect(""); renderMonthly(); renderOverview();
   const sel=document.getElementById("item"); if([...sel.options].some(o=>o.value===first)) sel.value=first; render(sel.value||first);
 });
 
@@ -131,6 +135,35 @@ document.getElementById("filter").addEventListener("input",e=>{buildSelect(e.tar
 document.getElementById("item").addEventListener("change",e=>render(e.target.value));
 document.getElementById("store").addEventListener("change",e=>{buildSelect(document.getElementById("filter").value.trim()); renderOverview(); const v=document.getElementById("item").value; if(v) render(v);});
 
+function bargainPool(){
+  return DATA.items.filter(i=>i.leaf&&i.season&&i.season_years>=3&&i.store&&i.store!=="分析用の合成系列"&&i.store!=="教育・保育・習い事");
+}
+function renderMonthly(){
+  const box=document.getElementById("monthly");
+  const now=new Date(Date.now()+9*3600*1000); const curM=now.getUTCMonth()+1;
+  const sel=box.querySelector("#monthSel"); const m=sel?+sel.value:curM; const idx=m-1;
+  const ly=Math.floor(DATA.latest_month/100), lm=DATA.latest_month%100;
+  const pool=bargainPool();
+  const cheap=pool.slice().sort((a,b)=>a.season[idx]-b.season[idx]).slice(0,10);
+  const dear=pool.slice().sort((a,b)=>b.season[idx]-a.season[idx]).slice(0,10);
+  const real=pool.filter(i=>i.season.indexOf(Math.min(...i.season))===idx&&i.yoy!=null&&i.yoy<0).sort((a,b)=>a.season[idx]-b.season[idx]).slice(0,10);
+  const sname=i=>i.store.split("（")[0];
+  const row=(i,n)=>`<tr data-code="${i.code}"><td>${n+1}</td><td class="name">${esc(i.name)}</td><td><span class="tag">${esc(sname(i))}</span></td><td class="${cls(i.season[idx])}">${i.season[idx]>0?"+":""}${i.season[idx].toFixed(1)}%</td><td class="${cls(i.yoy)}">${pct(i.yoy)}</td></tr>`;
+  const head=`<thead><tr><th>順位</th><th>品目</th><th>店</th><th>${m}月の年平均比</th><th>前年比（${lm}月）</th></tr></thead>`;
+  const opts=MONTHS.map((x,i)=>`<option value="${i+1}"${i+1===m?" selected":""}>${x}${i+1===curM?"（今月）":""}</option>`).join("");
+  let h=`<h2>${m}月のお買い得・買い控え品目</h2>`;
+  h+=`<p class="lead">過去の値動きから、${m}月に年平均より安くなりやすい品目と高くなりやすい品目。月を変えて見ることもできます： <select id="monthSel" style="width:auto;display:inline-block;font-size:17px;padding:5px 10px">${opts}</select></p>`;
+  h+=`<div class="tri">`;
+  h+=`<div style="overflow-x:auto"><h3>安くなりやすい TOP10</h3><table class="overview">${head}<tbody>${cheap.map(row).join("")}</tbody></table></div>`;
+  h+=`<div style="overflow-x:auto"><h3>高くなりやすい TOP10（買い控え）</h3><table class="overview">${head}<tbody>${dear.map(row).join("")}</tbody></table></div>`;
+  h+=`</div>`;
+  h+=`<h3>本当のお買い得：${m}月が年内で最も安い月で、しかも前年より安い品目</h3>`;
+  h+=real.length?`<table class="overview">${head}<tbody>${real.map(row).join("")}</tbody></table>`:`<p class="lead">該当なし</p>`;
+  h+=`<p class="note">対象：${pool.length}品目（授業料などの制度価格、分析用の合成系列は除く）。年平均比は${DATA.years[0]}年以降の季節傾向、前年同月比はデータ最新月の値。行を押すとその品目のグラフに移ります。</p>`;
+  box.innerHTML=h;
+  box.querySelector("#monthSel").addEventListener("change",renderMonthly);
+  box.querySelectorAll("tr[data-code]").forEach(tr=>tr.addEventListener("click",()=>{const c=tr.dataset.code; const st=document.getElementById("store"); if(st.value&&byCode.get(c).store!==st.value){st.value=""; renderOverview();} document.getElementById("filter").value=""; buildSelect(""); document.getElementById("item").value=c; render(c); document.getElementById("main").scrollIntoView({behavior:"smooth"});}));
+}
 function renderOverview(){
   const st=document.getElementById("store").value; const box=document.getElementById("overview");
   if(!st){box.innerHTML=""; return;}

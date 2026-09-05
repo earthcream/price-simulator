@@ -194,7 +194,7 @@ def main():
 def build_report(data, now):
     ly, lm = divmod(data["latest_month"], 100)
     leaves = [i for i in data["items"] if i["leaf"] and i["season"] and i["season_years"] >= 3
-              and i.get("store") != "分析用の合成系列"]
+              and i.get("store") not in ("分析用の合成系列", "教育・保育・習い事")]
 
     def month_after(y, m, k):
         m2 = m + k
@@ -206,7 +206,7 @@ def build_report(data, now):
     lines.append(f"- 出典：{data['source']}")
     lines.append(f"- 生成日時：{now.strftime('%Y-%m-%d %H:%M')}（JST）")
     lines.append(f"- 季節傾向：{data['years'][0]}年以降で1〜12月が揃った年を対象に、各年の年平均＝100として月別の乖離を平均したもの")
-    lines.append(f"- 対象：品目レベル {len(leaves)}品目（季節傾向は3年分以上ある品目のみ）")
+    lines.append(f"- 対象：品目レベル {len(leaves)}品目（季節傾向は3年分以上ある品目のみ。授業料などの制度価格と分析用の合成系列は除く）")
     lines.append("")
 
     # 対象月：データ最新月の翌月（＝記事公開時点の「今月」）と、その翌月（「来月」）
@@ -221,6 +221,17 @@ def build_report(data, now):
         lines.append("|---|---|---|---|---|---|")
         for n, i in enumerate(cheap, 1):
             lines.append(f"| {n} | {i['name']} | {_store(i)} | {i['season'][idx]:+.1f}% | {_min_month(i)} | {_pct(i['yoy'])} |")
+        lines.append("")
+        real = sorted([i for i in leaves if i["season"].index(min(i["season"])) == idx
+                       and i["yoy"] is not None and i["yoy"] < 0], key=lambda i: i["season"][idx])[:10]
+        lines.append(f"## {label}（{ty}年{tm}月）の「本当のお買い得」：{tm}月が年内最安の月で、しかも前年より安い品目")
+        lines.append("")
+        lines.append("| 順位 | 品目 | 店 | 年平均比 | 直近の前年同月比 |")
+        lines.append("|---|---|---|---|---|")
+        for n, i in enumerate(real, 1):
+            lines.append(f"| {n} | {i['name']} | {_store(i)} | {i['season'][idx]:+.1f}% | {_pct(i['yoy'])} |")
+        if not real:
+            lines.append("| ― | 該当なし | | | |")
         lines.append("")
         lines.append(f"## {label}（{ty}年{tm}月）に高くなりやすい品目 TOP15")
         lines.append("")
