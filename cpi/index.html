@@ -32,7 +32,9 @@
   .picker{margin:26px 0 10px;background:var(--paper-warm);border:1px solid var(--rule);padding:18px 20px}
   .picker label{display:block;font-weight:600;margin-bottom:6px}
   .picker-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
-  .picker-row > div{flex:1 1 300px}
+  .picker-row > div{flex:1 1 260px}
+  .overview tr{cursor:pointer} .overview tr:hover td{background:var(--paper-warm)} .overview td.name{font-weight:600}
+  .tag{display:inline-block;padding:1px 8px;border-radius:3px;font-size:14.5px;background:var(--paper-deep)}
   select,input[type=text]{width:100%;font:inherit;font-size:18px;padding:9px 12px;border:1px solid var(--rule);background:#fff;color:var(--ink);border-radius:4px}
   .hint{color:var(--ink-mute);font-size:14.5px;margin:6px 0 0}
   h2{font-size:26px;margin:34px 0 8px;font-weight:700;border-left:6px solid var(--accent);padding-left:12px;line-height:1.4}
@@ -72,12 +74,14 @@
 
   <div class="picker">
     <div class="picker-row">
+      <div><label for="store">どこで買うもの？（店の種類で絞り込み）</label><select id="store"><option value="">すべて</option></select></div>
       <div><label for="filter">品目を探す（一部の文字で絞り込み）</label><input type="text" id="filter" placeholder="例：キャベツ、ビール、電気代"></div>
       <div><label for="item">品目を選ぶ</label><select id="item"></select></div>
     </div>
     <p class="hint" id="hint"></p>
   </div>
 
+  <div id="overview"></div>
   <div id="main"></div>
 
   <footer>
@@ -97,16 +101,21 @@ fetch("data.json?v="+Date.now()).then(r=>r.json()).then(d=>{
   const ly=Math.floor(d.latest_month/100), lm=d.latest_month%100;
   document.getElementById("metaLine").textContent=`データ最新月：${ly}年${lm}月 ／ 更新：${d.updated} ／ 収録：${d.items.filter(i=>i.leaf).length}品目＋分類 ${d.items.filter(i=>!i.leaf).length}`;
   document.getElementById("srcLine").textContent="出典："+d.source;
-  buildSelect("");
+  const ss=document.getElementById("store");
+  (d.stores||[]).forEach(st=>{const n=d.items.filter(i=>i.store===st).length; if(!n) return; const o=document.createElement("option"); o.value=st; o.textContent=`${st}（${n}品目）`; ss.appendChild(o);});
   const h=decodeURIComponent(location.hash.slice(1));
   const first=byCode.has(h)?h:(d.items.find(i=>i.leaf)||d.items[0]).code;
-  document.getElementById("item").value=first; render(first);
+  const params=new URLSearchParams(location.search); if(params.get("store")&&[...ss.options].some(o=>o.value===params.get("store"))) ss.value=params.get("store");
+  buildSelect(""); renderOverview();
+  const sel=document.getElementById("item"); if([...sel.options].some(o=>o.value===first)) sel.value=first; render(sel.value||first);
 });
 
 function buildSelect(q){
   const sel=document.getElementById("item"); const cur=sel.value; sel.innerHTML="";
   let n=0;
+  const st=document.getElementById("store").value;
   for(const it of DATA.items){
+    if(st && it.store!==st) continue;
     if(q && !it.name.includes(q)) continue;
     const o=document.createElement("option"); o.value=it.code;
     o.textContent=(it.leaf?"　".repeat(Math.max(0,Math.min(it.level-1,4)))+it.name:"【"+it.name+"】");
@@ -117,13 +126,37 @@ function buildSelect(q){
 }
 document.getElementById("filter").addEventListener("input",e=>{buildSelect(e.target.value.trim()); const v=document.getElementById("item").value; if(v) render(v);});
 document.getElementById("item").addEventListener("change",e=>render(e.target.value));
+document.getElementById("store").addEventListener("change",e=>{buildSelect(document.getElementById("filter").value.trim()); renderOverview(); const v=document.getElementById("item").value; if(v) render(v);});
+
+function renderOverview(){
+  const st=document.getElementById("store").value; const box=document.getElementById("overview");
+  if(!st){box.innerHTML=""; return;}
+  const ly=Math.floor(DATA.latest_month/100), lm=DATA.latest_month%100;
+  const tm=lm%12+1, ty=lm===12?ly+1:ly;   // データ最新月の翌月＝いまの月
+  const idx=tm-1;
+  const items=DATA.items.filter(i=>i.store===st&&i.season);
+  const rows=items.map(i=>({i,v:i.season[idx]})).sort((a,b)=>a.v-b.v);
+  const cheap=rows.filter(r=>r.v<=-1).length, dear=rows.filter(r=>r.v>=1).length;
+  let h=`<h2>${esc(st)}：${ty}年${tm}月の「買い時」一覧</h2>`;
+  h+=`<p class="lead">${items.length}品目のうち、${tm}月が年平均より安くなりやすいのは <b class="neg">${cheap}品目</b>、高くなりやすいのは <b class="pos">${dear}品目</b>。安い順に並べています。行を押すとその品目のグラフに移ります。</p>`;
+  h+=`<div style="overflow-x:auto"><table class="overview"><thead><tr><th>品目</th><th>${tm}月の年平均比</th><th>判定</th><th>最安月</th><th>最高月</th><th>前年同月比（${ly}年${lm}月）</th></tr></thead><tbody>`;
+  rows.forEach(({i,v})=>{
+    const s=i.season, mn=s.indexOf(Math.min(...s))+1, mx=s.indexOf(Math.max(...s))+1;
+    const j=v<=-3?"買い時":v<=-1?"やや安い":v>=3?"高い時期":v>=1?"やや高い":"平均並み";
+    h+=`<tr data-code="${i.code}"><td class="name">${esc(i.name)}</td><td class="${cls(v)}">${v>0?"+":""}${v.toFixed(1)}%</td><td style="text-align:center"><span class="tag ${v<=-1?"neg":v>=1?"pos":""}">${j}</span></td><td>${mn}月（${s[mn-1].toFixed(1)}%）</td><td>${mx}月（+${s[mx-1].toFixed(1)}%）</td><td class="${cls(i.yoy)}">${pct(i.yoy)}</td></tr>`;
+  });
+  h+=`</tbody></table></div><p class="note">判定：年平均比 -3%以下＝買い時、-1%以下＝やや安い、+1%以上＝やや高い、+3%以上＝高い時期。店の分類は目安です。</p>`;
+  box.innerHTML=h;
+  box.querySelectorAll("tr[data-code]").forEach(tr=>tr.addEventListener("click",()=>{const c=tr.dataset.code; const sel=document.getElementById("item"); if(![...sel.options].some(o=>o.value===c)){document.getElementById("filter").value=""; buildSelect("");} sel.value=c; render(c); document.getElementById("main").scrollIntoView({behavior:"smooth"});}));
+}
 
 function render(code){
   const it=byCode.get(code); if(!it) return;
-  history.replaceState(null,"","#"+encodeURIComponent(code));
+  const stv=document.getElementById("store").value;
+  history.replaceState(null,"",(stv?"?store="+encodeURIComponent(stv):location.pathname)+"#"+encodeURIComponent(code));
   const ly=Math.floor(DATA.latest_month/100), lm=DATA.latest_month%100;
   const years=Object.keys(it.years).sort();
-  let html=`<h2>${esc(it.name)}${it.leaf?"":"（分類）"}</h2>`;
+  let html=`<h2>${esc(it.name)}${it.leaf?"":"（分類）"}${it.store?` <span class="tag">${esc(it.store)}</span>`:""}</h2>`;
   html+=`<p class="lead">直近${years.length}年の1〜12月の値動き（2020年平均＝100の指数）。線が下にある月ほど安い。</p>`;
   html+=`<div class="chart-box">${chartSVG(it,years)}</div>`;
   html+=`<div class="stats"><span>最新（${ly}年${lm}月）：<b>${fmt(it.latest)}</b></span><span>前年同月比：<b class="${cls(it.yoy)}">${pct(it.yoy)}</b></span><span>前月比：<b class="${cls(it.mom)}">${pct(it.mom)}</b></span></div>`;

@@ -18,6 +18,9 @@ from datetime import datetime, timedelta, timezone
 
 import requests
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from cpi_store_map import classify, STORES
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_DIR = os.path.join(ROOT, "cpi")
 REPORT_DIR = os.path.join(OUT_DIR, "reports")
@@ -125,11 +128,21 @@ def main():
     ly, lm = divmod(latest, 100)
     years = list(range(first_year, ly + 1))
 
+    by_code = {it["code"]: it for it in items}
+
+    def path_of(it):
+        p, c = [], it
+        while c["parent"] and c["parent"] in by_code:
+            c = by_code[c["parent"]]
+            p.append(c["name"])
+        return ">".join(reversed(p))
+
     out_items = []
     for it in items:
         s = values.get(it["code"])
         if not s:
             continue
+        leaf = it["code"] not in parents
         matrix = {}
         for y in years:
             row = [s.get(y * 100 + m) for m in range(1, 13)]
@@ -145,7 +158,8 @@ def main():
             "name": it["name"],
             "level": it["level"],
             "parent": it["parent"],
-            "leaf": it["code"] not in parents,
+            "leaf": leaf,
+            "store": classify(it["name"], path_of(it)) if leaf else None,
             "years": matrix,
             "season": prof,
             "season_years": used,
@@ -161,6 +175,7 @@ def main():
         "source": "総務省統計局「消費者物価指数（2020年基準）」全国・品目別・月次（e-Stat 統計表ID 0003427113）",
         "latest_month": latest,
         "years": years,
+        "stores": STORES,
         "items": out_items,
     }
     with open(os.path.join(OUT_DIR, "data.json"), "w", encoding="utf-8") as f:
@@ -178,7 +193,8 @@ def main():
 # ---------------------------------------------------------------- 記事ネタ
 def build_report(data, now):
     ly, lm = divmod(data["latest_month"], 100)
-    leaves = [i for i in data["items"] if i["leaf"] and i["season"] and i["season_years"] >= 3]
+    leaves = [i for i in data["items"] if i["leaf"] and i["season"] and i["season_years"] >= 3
+              and i.get("store") != "分析用の合成系列"]
 
     def month_after(y, m, k):
         m2 = m + k
@@ -201,17 +217,17 @@ def build_report(data, now):
         dear = sorted(leaves, key=lambda i: -i["season"][idx])[:15]
         lines.append(f"## {label}（{ty}年{tm}月）に安くなりやすい品目 TOP15")
         lines.append("")
-        lines.append("| 順位 | 品目 | 年平均比 | 年内で最安の月 | 直近の前年同月比 |")
-        lines.append("|---|---|---|---|---|")
+        lines.append("| 順位 | 品目 | 店 | 年平均比 | 年内で最安の月 | 直近の前年同月比 |")
+        lines.append("|---|---|---|---|---|---|")
         for n, i in enumerate(cheap, 1):
-            lines.append(f"| {n} | {i['name']} | {i['season'][idx]:+.1f}% | {_min_month(i)} | {_pct(i['yoy'])} |")
+            lines.append(f"| {n} | {i['name']} | {_store(i)} | {i['season'][idx]:+.1f}% | {_min_month(i)} | {_pct(i['yoy'])} |")
         lines.append("")
         lines.append(f"## {label}（{ty}年{tm}月）に高くなりやすい品目 TOP15")
         lines.append("")
-        lines.append("| 順位 | 品目 | 年平均比 | 年内で最安の月 | 直近の前年同月比 |")
-        lines.append("|---|---|---|---|---|")
+        lines.append("| 順位 | 品目 | 店 | 年平均比 | 年内で最安の月 | 直近の前年同月比 |")
+        lines.append("|---|---|---|---|---|---|")
         for n, i in enumerate(dear, 1):
-            lines.append(f"| {n} | {i['name']} | {i['season'][idx]:+.1f}% | {_min_month(i)} | {_pct(i['yoy'])} |")
+            lines.append(f"| {n} | {i['name']} | {_store(i)} | {i['season'][idx]:+.1f}% | {_min_month(i)} | {_pct(i['yoy'])} |")
         lines.append("")
 
     # 足元の動き
@@ -247,6 +263,10 @@ def build_report(data, now):
     lines.append("※ 年平均比は季節的な傾向であり、当年の実際の価格を保証するものではない。")
     lines.append("※ グラフ・全品目の傾向は https://simulator.future-procurement.com/cpi/ で確認できる。")
     return "\n".join(lines) + "\n"
+
+
+def _store(i):
+    return (i.get("store") or "").split("（")[0]
 
 
 def _min_month(i):
