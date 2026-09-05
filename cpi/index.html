@@ -34,6 +34,9 @@
   .picker-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
   .picker-row > div{flex:1 1 260px}
   .overview tr{cursor:pointer} .overview tr:hover td{background:var(--paper-warm)} .overview td.name{font-weight:600}
+  .btn{font:inherit;font-size:17px;padding:9px 18px;background:var(--accent);color:#fff;border:none;border-radius:4px;cursor:pointer} .btn:hover{background:var(--accent-deep)}
+  .item-block{border-top:3px double var(--rule);margin-top:30px;padding-top:6px;break-inside:avoid;page-break-inside:avoid}
+  @media print{ .btn{display:none} .item-block{break-before:page;page-break-before:always;border-top:none} }
   .tag{display:inline-block;padding:1px 8px;border-radius:3px;font-size:14.5px;background:var(--paper-deep)}
   select,input[type=text]{width:100%;font:inherit;font-size:18px;padding:9px 12px;border:1px solid var(--rule);background:#fff;color:var(--ink);border-radius:4px}
   .hint{color:var(--ink-mute);font-size:14.5px;margin:6px 0 0}
@@ -145,8 +148,9 @@ function renderOverview(){
     const j=v<=-3?"買い時":v<=-1?"やや安い":v>=3?"高い時期":v>=1?"やや高い":"平均並み";
     h+=`<tr data-code="${i.code}"><td class="name">${esc(i.name)}</td><td class="${cls(v)}">${v>0?"+":""}${v.toFixed(1)}%</td><td style="text-align:center"><span class="tag ${v<=-1?"neg":v>=1?"pos":""}">${j}</span></td><td>${mn}月（${s[mn-1].toFixed(1)}%）</td><td>${mx}月（+${s[mx-1].toFixed(1)}%）</td><td class="${cls(i.yoy)}">${pct(i.yoy)}</td></tr>`;
   });
-  h+=`</tbody></table></div><p class="note">判定：年平均比 -3%以下＝買い時、-1%以下＝やや安い、+1%以上＝やや高い、+3%以上＝高い時期。店の分類は目安です。</p>`;
+  h+=`</tbody></table></div><p style="margin:14px 0"><button type="button" class="btn" id="showAll">この店の全${items.length}品目のグラフと表をまとめて表示</button></p><p class="note">判定：年平均比 -3%以下＝買い時、-1%以下＝やや安い、+1%以上＝やや高い、+3%以上＝高い時期。店の分類は目安です。</p>`;
   box.innerHTML=h;
+  document.getElementById("showAll").addEventListener("click",()=>{renderAll(st); document.getElementById("main").scrollIntoView({behavior:"smooth"});});
   box.querySelectorAll("tr[data-code]").forEach(tr=>tr.addEventListener("click",()=>{const c=tr.dataset.code; const sel=document.getElementById("item"); if(![...sel.options].some(o=>o.value===c)){document.getElementById("filter").value=""; buildSelect("");} sel.value=c; render(c); document.getElementById("main").scrollIntoView({behavior:"smooth"});}));
 }
 
@@ -154,6 +158,15 @@ function render(code){
   const it=byCode.get(code); if(!it) return;
   const stv=document.getElementById("store").value;
   history.replaceState(null,"",(stv?"?store="+encodeURIComponent(stv):location.pathname)+"#"+encodeURIComponent(code));
+  document.getElementById("main").innerHTML=itemHTML(it);
+}
+function renderAll(st){
+  const items=DATA.items.filter(i=>i.store===st);
+  const main=document.getElementById("main");
+  main.innerHTML=`<p class="lead" style="margin-top:20px">${esc(st)}の全${items.length}品目を表示しています。ブラウザの印刷機能でPDFにできます。<button type="button" class="btn" id="backOne">1品目ずつの表示に戻る</button></p>`+items.map(i=>`<section class="item-block">${itemHTML(i)}</section>`).join("");
+  document.getElementById("backOne").addEventListener("click",()=>render(document.getElementById("item").value));
+}
+function itemHTML(it){
   const ly=Math.floor(DATA.latest_month/100), lm=DATA.latest_month%100;
   const years=Object.keys(it.years).sort();
   let html=`<h2>${esc(it.name)}${it.leaf?"":"（分類）"}${it.store?` <span class="tag">${esc(it.store)}</span>`:""}</h2>`;
@@ -178,7 +191,7 @@ function render(code){
     html+=`<p class="note">1〜12月が揃った年が無いため、季節傾向は算出していません。</p>`;
   }
   html+=yearTable(it,years);
-  document.getElementById("main").innerHTML=html;
+  return html;
 }
 
 function chartSVG(it,years){
