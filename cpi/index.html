@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>消費者物価 品目別「買い時」カレンダー｜調達人材の相場確認サイト（未来調達研究所）</title>
+<meta name="description" content="総務省・消費者物価指数（全国・品目別）から、品目ごとに直近5年の1〜12月の値動きと「何月が安い・何月が高い」という季節傾向を示します。毎月自動更新。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1a2620; --ink-soft:#3a4a40; --ink-mute:#6f7d73;
+    --paper:#f4f7f2; --paper-warm:#e8efe4; --paper-deep:#dde6d6;
+    --accent:#2d5f3f; --accent-deep:#1f4530; --accent-bright:#4a8862; --rule:#c5d2bd;
+    --up:#9c3b2e; --down:#2a5f7a;
+    --serif-jp:'Shippori Mincho',"Hiragino Mincho ProN","Yu Mincho",serif;
+    --mono:'JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif-jp);font-size:18px;line-height:1.8}
+  a{color:var(--accent)}
+  .container{max-width:1100px;margin:0 auto;padding:0 24px 60px}
+  header{padding:28px 0 18px;border-bottom:2px solid var(--accent)}
+  .mast-top{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .mast-copy{color:var(--ink-mute);font-size:15px}
+  h1{font-size:34px;line-height:1.35;margin:14px 0 4px;font-weight:700;letter-spacing:.02em}
+  .subtitle{color:var(--ink-soft);font-size:17px;margin:0}
+  .tagline{margin:14px 0 6px;color:var(--ink-soft);font-size:17px}
+  .meta-line{color:var(--ink-mute);font-size:15px}
+  .nav{margin:10px 0 0;font-size:15.5px}
+  .picker{margin:26px 0 10px;background:var(--paper-warm);border:1px solid var(--rule);padding:18px 20px}
+  .picker label{display:block;font-weight:600;margin-bottom:6px}
+  .picker-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+  .picker-row > div{flex:1 1 300px}
+  select,input[type=text]{width:100%;font:inherit;font-size:18px;padding:9px 12px;border:1px solid var(--rule);background:#fff;color:var(--ink);border-radius:4px}
+  .hint{color:var(--ink-mute);font-size:14.5px;margin:6px 0 0}
+  h2{font-size:26px;margin:34px 0 8px;font-weight:700;border-left:6px solid var(--accent);padding-left:12px;line-height:1.4}
+  .lead{color:var(--ink-soft);font-size:16.5px;margin:0 0 12px}
+  .chart-box{background:#fff;border:1px solid var(--rule);padding:14px 10px 6px;overflow-x:auto}
+  svg text{font-family:var(--serif-jp)}
+  .verdict{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+  .verdict .card{background:#fff;border:1px solid var(--rule);padding:16px 18px}
+  .verdict .card b{display:block;font-size:15px;color:var(--ink-mute);font-weight:500;margin-bottom:4px}
+  .verdict .card .big{font-size:30px;font-weight:700;line-height:1.3}
+  .verdict .cheap .big{color:var(--down)} .verdict .dear .big{color:var(--up)}
+  .verdict .card .sub{font-size:15.5px;color:var(--ink-soft)}
+  table{border-collapse:collapse;width:100%;background:#fff;font-size:17px}
+  th,td{border:1px solid var(--rule);padding:8px 10px;text-align:right;white-space:nowrap}
+  th{background:var(--paper-deep);font-weight:600;text-align:center}
+  td:first-child,th:first-child{text-align:left}
+  .season-grid td.m{font-family:var(--mono);font-size:16px}
+  .neg{color:var(--down);font-weight:600} .pos{color:var(--up);font-weight:600}
+  .bar{display:inline-block;height:12px;vertical-align:middle;border-radius:2px}
+  .stats{display:flex;gap:26px;flex-wrap:wrap;margin:8px 0 0;font-size:16.5px;color:var(--ink-soft)}
+  .note{color:var(--ink-mute);font-size:14.5px;margin-top:12px}
+  footer{margin-top:50px;border-top:1px solid var(--rule);padding-top:16px;color:var(--ink-mute);font-size:14.5px}
+  @media(max-width:700px){ .container{padding:0 14px 40px} h1{font-size:27px} .verdict{grid-template-columns:1fr} table{font-size:15px} th,td{padding:6px 6px} body{font-size:17px} }
+  @media print{ .picker,.nav,footer{display:none} body{background:#fff} }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="mast-top"><a href="https://www.future-procurement.com/" target="_blank" rel="noopener"><img src="https://www.future-procurement.com/logo.png" alt="未来調達研究所株式会社" style="height:54px;width:auto"></a><span class="mast-copy">調達人材が必要な市況データ、すべて集めました</span></div>
+    <h1>消費者物価 品目別「買い時」カレンダー</h1>
+    <p class="subtitle">品目ごとに「何月が安く、何月が高いか」を過去の値動きから示します</p>
+    <p class="tagline">総務省「消費者物価指数」（全国・品目別・月次）から、直近5年分の1〜12月の値動きを重ねて表示し、各年の年平均＝100とした月別の乖離を平均して季節傾向を出しています。データは総務省の公表後、毎月自動で更新されます。</p>
+    <div class="meta-line" id="metaLine">データ読み込み中…</div>
+    <div class="nav"><a href="../">← 値上げ妥当性シミュレーター（企業物価・賃金）へ戻る</a></div>
+  </header>
+
+  <div class="picker">
+    <div class="picker-row">
+      <div><label for="filter">品目を探す（一部の文字で絞り込み）</label><input type="text" id="filter" placeholder="例：キャベツ、ビール、電気代"></div>
+      <div><label for="item">品目を選ぶ</label><select id="item"></select></div>
+    </div>
+    <p class="hint" id="hint"></p>
+  </div>
+
+  <div id="main"></div>
+
+  <footer>
+    <div id="srcLine"></div>
+    <div>年平均比（季節傾向）は過去の傾向であり、当年の価格を保証するものではありません。制作：未来調達研究所株式会社</div>
+  </footer>
+</div>
+
+<script>
+const COLORS=["#2d5f3f","#9c3b2e","#2a5f7a","#b08a2e","#6b4c9a","#1a2620","#e07b39"];
+const MONTHS=["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
+let DATA=null, byCode=new Map();
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+fetch("data.json?v="+Date.now()).then(r=>r.json()).then(d=>{
+  DATA=d; d.items.forEach(i=>byCode.set(i.code,i));
+  const ly=Math.floor(d.latest_month/100), lm=d.latest_month%100;
+  document.getElementById("metaLine").textContent=`データ最新月：${ly}年${lm}月 ／ 更新：${d.updated} ／ 収録：${d.items.filter(i=>i.leaf).length}品目＋分類 ${d.items.filter(i=>!i.leaf).length}`;
+  document.getElementById("srcLine").textContent="出典："+d.source;
+  buildSelect("");
+  const h=decodeURIComponent(location.hash.slice(1));
+  const first=byCode.has(h)?h:(d.items.find(i=>i.leaf)||d.items[0]).code;
+  document.getElementById("item").value=first; render(first);
+});
+
+function buildSelect(q){
+  const sel=document.getElementById("item"); const cur=sel.value; sel.innerHTML="";
+  let n=0;
+  for(const it of DATA.items){
+    if(q && !it.name.includes(q)) continue;
+    const o=document.createElement("option"); o.value=it.code;
+    o.textContent=(it.leaf?"　".repeat(Math.max(0,Math.min(it.level-1,4)))+it.name:"【"+it.name+"】");
+    sel.appendChild(o); n++;
+  }
+  document.getElementById("hint").textContent=q?`「${q}」を含む ${n} 件。【 】は分類（複数品目の合成）`:"【 】は分類（複数品目の合成）。文字を入れると絞り込めます";
+  if([...sel.options].some(o=>o.value===cur)) sel.value=cur;
+}
+document.getElementById("filter").addEventListener("input",e=>{buildSelect(e.target.value.trim()); const v=document.getElementById("item").value; if(v) render(v);});
+document.getElementById("item").addEventListener("change",e=>render(e.target.value));
+
+function render(code){
+  const it=byCode.get(code); if(!it) return;
+  history.replaceState(null,"","#"+encodeURIComponent(code));
+  const ly=Math.floor(DATA.latest_month/100), lm=DATA.latest_month%100;
+  const years=Object.keys(it.years).sort();
+  let html=`<h2>${esc(it.name)}${it.leaf?"":"（分類）"}</h2>`;
+  html+=`<p class="lead">直近${years.length}年の1〜12月の値動き（2020年平均＝100の指数）。線が下にある月ほど安い。</p>`;
+  html+=`<div class="chart-box">${chartSVG(it,years)}</div>`;
+  html+=`<div class="stats"><span>最新（${ly}年${lm}月）：<b>${fmt(it.latest)}</b></span><span>前年同月比：<b class="${cls(it.yoy)}">${pct(it.yoy)}</b></span><span>前月比：<b class="${cls(it.mom)}">${pct(it.mom)}</b></span></div>`;
+
+  if(it.season){
+    const s=it.season; const mn=s.indexOf(Math.min(...s)), mx=s.indexOf(Math.max(...s));
+    const amp=Math.max(...s)-Math.min(...s);
+    const cheapM=s.map((v,i)=>[v,i]).filter(x=>x[0]<=-1).sort((a,b)=>a[0]-b[0]).map(x=>MONTHS[x[1]]);
+    const dearM=s.map((v,i)=>[v,i]).filter(x=>x[0]>=1).sort((a,b)=>b[0]-a[0]).map(x=>MONTHS[x[1]]);
+    html+=`<h2>何月が安い？ 何月が高い？</h2>`;
+    html+=`<p class="lead">各年の年平均を100として、月ごとの乖離を${it.season_years}年分平均したもの（季節傾向）。</p>`;
+    html+=`<div class="verdict">
+      <div class="card cheap"><b>安くなりやすい月</b><div class="big">${MONTHS[mn]}（年平均比 ${s[mn].toFixed(1)}%）</div><div class="sub">${cheapM.length?"年平均より1%以上安い月："+cheapM.join("・"):"年平均より1%以上安い月はない"}</div></div>
+      <div class="card dear"><b>高くなりやすい月</b><div class="big">${MONTHS[mx]}（年平均比 +${s[mx].toFixed(1)}%）</div><div class="sub">${dearM.length?"年平均より1%以上高い月："+dearM.join("・"):"年平均より1%以上高い月はない"}</div></div>
+    </div>`;
+    html+=`<p class="lead">${amp>=10?"季節による差が非常に大きい品目です（最安月と最高月の差 "+amp.toFixed(1)+"ポイント）。買う時期で値段が大きく変わります。":amp>=3?"季節による差がある品目です（最安月と最高月の差 "+amp.toFixed(1)+"ポイント）。":"季節による差はほとんどありません（最安月と最高月の差 "+amp.toFixed(1)+"ポイント）。時期より価格トレンドで判断する品目です。"}</p>`;
+    html+=seasonTable(it);
+  }else{
+    html+=`<p class="note">1〜12月が揃った年が無いため、季節傾向は算出していません。</p>`;
+  }
+  html+=yearTable(it,years);
+  document.getElementById("main").innerHTML=html;
+}
+
+function chartSVG(it,years){
+  const W=920,H=420,L=64,R=175,T=20,B=44;
+  const all=[]; years.forEach(y=>it.years[y].forEach(v=>{if(v!=null)all.push(v)}));
+  let lo=Math.min(...all), hi=Math.max(...all); const pad=(hi-lo)*0.12||1; lo-=pad; hi+=pad;
+  const X=i=>L+(W-L-R)*i/11, Y=v=>T+(H-T-B)*(hi-v)/(hi-lo);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:640px;display:block">`;
+  const ticks=niceTicks(lo,hi,6);
+  ticks.forEach(t=>{s+=`<line x1="${L}" x2="${W-R}" y1="${Y(t)}" y2="${Y(t)}" stroke="#c5d2bd" stroke-width="1"/><text x="${L-8}" y="${Y(t)+5}" text-anchor="end" font-size="14" fill="#3a4a40">${t}</text>`;});
+  MONTHS.forEach((m,i)=>{s+=`<text x="${X(i)}" y="${H-B+24}" text-anchor="middle" font-size="15" fill="#1a2620">${m}</text>`;});
+  years.forEach((y,k)=>{
+    const c=COLORS[k%COLORS.length]; const vals=it.years[y];
+    let d="", prev=false;
+    vals.forEach((v,i)=>{ if(v==null){prev=false;return;} d+=(prev?"L":"M")+X(i).toFixed(1)+" "+Y(v).toFixed(1); prev=true; });
+    const last=k===years.length-1;
+    s+=`<path d="${d}" fill="none" stroke="${c}" stroke-width="${last?4:2.6}" stroke-linejoin="round" stroke-linecap="round"/>`;
+    vals.forEach((v,i)=>{ if(v==null)return; s+=`<circle cx="${X(i)}" cy="${Y(v)}" r="${last?4.5:3}" fill="${c}"><title>${y}年${MONTHS[i]}：${v}</title></circle>`; });
+    const ly=T+18+k*26;
+    s+=`<line x1="${W-R+16}" x2="${W-R+48}" y1="${ly}" y2="${ly}" stroke="${c}" stroke-width="${last?4:2.6}"/><text x="${W-R+56}" y="${ly+5}" font-size="16" fill="#1a2620">${y}年${last?"（最新）":""}</text>`;
+  });
+  s+=`<line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" stroke="#3a4a40"/>`;
+  return s+"</svg>";
+}
+function niceTicks(lo,hi,n){const span=hi-lo, raw=span/n, mag=Math.pow(10,Math.floor(Math.log10(raw))); const step=[1,2,2.5,5,10].map(x=>x*mag).find(x=>x>=raw); const out=[]; for(let t=Math.ceil(lo/step)*step;t<=hi;t+=step) out.push(+t.toFixed(4)); return out;}
+
+function seasonTable(it){
+  const s=it.season, maxAbs=Math.max(1,...s.map(Math.abs));
+  let h=`<table class="season-grid"><thead><tr><th>月</th><th>年平均比</th><th style="text-align:left">安い ← → 高い</th><th>判定</th></tr></thead><tbody>`;
+  s.forEach((v,i)=>{
+    const w=Math.round(Math.abs(v)/maxAbs*160);
+    const bar=v<0?`<span style="display:inline-block;width:160px;text-align:right"><span class="bar" style="width:${w}px;background:#2a5f7a"></span></span><span style="display:inline-block;width:160px"></span>`
+                 :`<span style="display:inline-block;width:160px"></span><span style="display:inline-block;width:160px;text-align:left"><span class="bar" style="width:${w}px;background:#9c3b2e"></span></span>`;
+    const j=v<=-3?"買い時":v<=-1?"やや安い":v>=3?"高い時期":v>=1?"やや高い":"平均並み";
+    h+=`<tr><td>${MONTHS[i]}</td><td class="m ${cls(v)}">${v>0?"+":""}${v.toFixed(1)}%</td><td style="text-align:left">${bar}</td><td style="text-align:center" class="${v<=-1?"neg":v>=1?"pos":""}">${j}</td></tr>`;
+  });
+  return h+"</tbody></table>";
+}
+function yearTable(it,years){
+  let h=`<h2>数値表（2020年平均＝100）</h2><div style="overflow-x:auto"><table><thead><tr><th>年</th>${MONTHS.map(m=>`<th>${m}</th>`).join("")}<th>年平均</th></tr></thead><tbody>`;
+  years.forEach(y=>{const v=it.years[y]; const f=v.filter(x=>x!=null); const avg=f.length===12?(f.reduce((a,b)=>a+b,0)/12).toFixed(1):"―";
+    h+=`<tr><td>${y}年</td>${v.map(x=>`<td>${x==null?"":x.toFixed(1)}</td>`).join("")}<td>${avg}</td></tr>`;});
+  return h+"</tbody></table></div>";
+}
+const fmt=v=>v==null?"―":v.toFixed(1);
+const pct=v=>v==null?"―":(v>0?"+":"")+v.toFixed(1)+"%";
+const cls=v=>v==null?"":v<0?"neg":v>0?"pos":"";
+</script>
+</body>
+</html>
