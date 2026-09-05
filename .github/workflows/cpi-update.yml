@@ -1,0 +1,44 @@
+# 総務省の全国消費者物価指数は毎月19〜26日ごろ（原則、翌月の第3〜4金曜）に公表される。
+# 余裕をみて毎月28日 08:00 JST（27日 23:00 UTC）に e-Stat から取得 → cpi/data.json と
+# 記事ネタ cpi/reports/YYYYMM.md を更新してコミットする（GitHub Pagesが自動再デプロイ）。
+name: cpi-update
+
+on:
+  schedule:
+    - cron: "0 23 27 * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 依存パッケージのインストール
+        run: pip install requests
+
+      - name: 消費者物価指数の取得・季節傾向・記事ネタ生成
+        env:
+          ESTAT_APP_ID: ${{ secrets.ESTAT_APP_ID }}
+        run: python scripts/fetch_cpi.py
+
+      - name: 変更があればコミットしてプッシュ
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add cpi/data.json cpi/reports/
+          if git diff --cached --quiet; then
+            echo "変更なし（総務省の公表前の可能性）"
+          else
+            LATEST=$(python -c "import json;print(json.load(open('cpi/data.json'))['latest_month'])")
+            git commit -m "CPIデータ更新: ${LATEST}"
+            git pull --rebase
+            git push
+          fi
