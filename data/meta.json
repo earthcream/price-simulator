@@ -1,6 +1,6 @@
 {
   "source": "日本銀行「時系列統計データ検索サイト」(https://www.stat-search.boj.or.jp/)",
-  "latest_month": 202607,
+  "latest_month": 202608,
   "first_month": 198001,
   "n_series": 3285,
   "n_items_by_kind": {
@@ -14,6 +14,6 @@
   },
   "fx_range": [
     198001,
-    202607
+    202608
   ]
 }
