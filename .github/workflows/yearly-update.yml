@@ -33,6 +33,9 @@ jobs:
           ESTAT_APP_ID: ${{ secrets.ESTAT_APP_ID }}
         run: python scripts/fetch_annual_labor.py
 
+      - name: 設計労務単価の職種別時系列を再構築
+        run: python scripts/build_romu_history.py
+
       - name: JETRO海外賃金データの取得
         run: python scripts/fetch_jetro.py
 
@@ -43,7 +46,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/labor.json data/jetro.json data/jetro_history.json
+          git add data/labor.json data/jetro.json data/jetro_history.json data/romu_history.json
           if git diff --cached --quiet; then
             echo "変更なし"
           else
